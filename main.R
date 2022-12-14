@@ -1,8 +1,24 @@
 globaledo <- 12
 tiny <- 1e-12
+rounder <- -log(tiny)/log(10)
+fortenums <- readRDS("fortenums.rds")
+
+fpunique <- function(x,MARGIN=0,localrounder=rounder) {
+  if (MARGIN == 0) {
+    return(x[!duplicated(round(x,localrounder))])
+  }
+
+  if (MARGIN == 1) {
+    return(x[!duplicated( round(x,localrounder), MARGIN=1 ) , ] )
+  }
+
+  if (MARGIN == 2) {
+    return(x[ , !duplicated( round(x,localrounder), MARGIN=2 ) ] )
+  }
+}
 
 convert <- function(x,edo1,edo2) x*(edo2/edo1)
-tn <- function(set, n,edo=globaledo) ((set%%edo) + (n%%edo)) %% edo
+tn <- function(set, n, edo=globaledo) ((set%%edo) + (n%%edo)) %% edo
 tni <- function(set, n, edo=globaledo) sort(((n%%edo) - (set%%edo)) %% edo )
 startzero <- function(set, edo=globaledo) tn(set, -set[1], edo)
 
@@ -14,7 +30,7 @@ rotate <- function(x, n=1) {
 
 rotatewrap <- function(n,x) rotate(x,n)
 
-modecompare <- function(set, ref) sum(unique(sign(set - ref)))
+modecompare <- function(set, ref) sum(unique(sign(round(set - ref, rounder))))
 # Using voice-leading brightness, modecompare returns 1 if set is brighter than ref(erence),
 # -1 if set is darker than ref, and 0 if the sets are "tied" because they are identical or incomparable.
 
@@ -29,4 +45,181 @@ brightnessComps <- function(set, edo=globaledo) {
   modes <- split(modes,col(modes))
   res <- outer(modes,modes,Vectorize(modecompare))
   return(res)
+}
+
+eps <- function(set, edo=globaledo) {
+
+  modes <- t(findmodes(set,edo))
+  chart <- brightnessComps(set)*brightnessComps(set)
+  diffs <- outer(rowSums(modes),rowSums(modes),'-')
+  result <- chart * diffs
+
+  return(min(result[result > 0]))
+}
+
+delta <- function(set, edo=globaledo) {
+
+  modes <- t(findmodes(set, edo))
+  chart <- brightnessComps(set)*brightnessComps(set)
+  diag(chart) <- -1
+  chart <- (chart + 1)%%2
+
+  diffs <- outer(rowSums(modes),rowSums(modes),'-')
+  result <- chart * diffs
+
+  return(max(result))
+}
+
+ratio <- function(set, edo=globaledo) { return(delta(set, edo)/eps(set, edo)) }
+
+sc <- function(card,num) {
+  set <- fortenums[[card]][num]
+  res <- strtoi(unlist(strsplit(set,split=",")))
+  return(res)
+}
+
+normalorder <- function(set, edo=globaledo) {
+  set <- sort(set)
+  card <- length(set)
+  if (card == 1) { return(0) }
+  if (card == 0) { return(integer(0))}
+  modes <- findmodes(set, edo)
+
+  for (i in card:1) {
+     if (class(modes)[1]=="numeric") {return(modes)}
+     top <- min(modes[i,])
+     index <- which(modes[i,] == top)
+     modes <- modes[,index]
+  }
+
+  return(modes[,1])
+
+}
+
+setcompare <- function(x,y) {
+  card <- length(x)
+  if ( length(y) != card ) { print("Cardinality mismatch"); return(NA) }
+
+  modes <- cbind(x,y)
+
+  for (i in card:1) {
+    if (class(modes)[1]=="numeric") {return(modes)}
+    top <- min(modes[i,])
+    index <- which(modes[i,] == top)
+    modes <- modes[,index]
+  }
+
+  return(modes[,1])
+}
+
+primeform <- function(set, edo=globaledo) {
+  upset <- startzero(normalorder(set, edo))
+  downset <- startzero(normalorder(tni(set,0, edo), edo))
+  winner <- setcompare(upset, downset)
+  return(winner)
+}
+
+charm <- function(set, edo=globaledo) {
+  return(normalorder(tni(set,0, edo), edo))
+}
+
+scComp <- function(set,edo=globaledo) {
+  return(primeform(setdiff(0:(edo-1),set),edo))
+}
+
+fortenum <- function(set) {
+  card <- length(set)
+  strset <- toString(primeform(set, edo=12))
+  val <- which(fortenums[[card]]==strset)
+  return(paste0(card, "-", val))
+}
+
+zmate <- function(set) {
+  num <- fortenum(set)
+  res <- NA
+
+  if (num == "4-15") { res <- c(4,29) }
+  if (num == "4-29") { res <- c(4,15) }
+
+  if (num == "8-15") { res <- c(8,29) }
+  if (num == "8-29") { res <- c(8,15) }
+
+  if (num == "5-12") { res <- c(5,36) }
+  if (num == "5-36") { res <- c(5,12) }
+  if (num == "5-38") { res <- c(5,18) }
+  if (num == "5-18") { res <- c(5,38) }
+  if (num == "5-37") { res <- c(5,17) }
+  if (num == "5-17") { res <- c(5,37) }
+
+  if (num == "7-12") { res <- c(7,36) }
+  if (num == "7-36") { res <- c(7,12) }
+  if (num == "7-38") { res <- c(7,18) }
+  if (num == "7-18") { res <- c(7,38) }
+  if (num == "7-37") { res <- c(7,17) }
+  if (num == "7-17") { res <- c(7,37) }
+
+
+  if (num == "6-36") { res <- c(6,3) }
+  if (num == "6-3") { res <- c(6,36) }
+  if (num == "6-37") { res <- c(6,4) }
+  if (num == "6-4") { res <- c(6,37) }
+  if (num == "6-40") { res <- c(6,11) }
+  if (num == "6-11") { res <- c(6,40) }
+  if (num == "6-41") { res <- c(6,12) }
+  if (num == "6-12") { res <- c(6,41) }
+  if (num == "6-13") { res <- c(6,42) }
+  if (num == "6-42") { res <- c(6,13) }
+  if (num == "6-38") { res <- c(6,6) }
+  if (num == "6-6") { res <- c(6,38) }
+  if (num == "6-46") { res <- c(6,24) }
+  if (num == "6-24") { res <- c(6,46) }
+  if (num == "6-17") { res <- c(6,43) }
+  if (num == "6-43") { res <- c(6,17) }
+  if (num == "6-47") { res <- c(6,25) }
+  if (num == "6-25") { res <- c(6,47) }
+  if (num == "6-19") { res <- c(6,44) }
+  if (num == "6-44") { res <- c(6,19) }
+  if (num == "6-48") { res <- c(6,26) }
+  if (num == "6-26") { res <- c(6,48) }
+  if (num == "6-10") { res <- c(6,39) }
+  if (num == "6-39") { res <- c(6,10) }
+  if (num == "6-49") { res <- c(6,28) }
+  if (num == "6-28") { res <- c(6,49) }
+  if (num == "6-29") { res <- c(6,50) }
+  if (num == "6-50") { res <- c(6,29) }
+  if (num == "6-45") { res <- c(6,23) }
+  if (num == "6-23") { res <- c(6,45) }
+
+  if (is.na(res[1])) { return(res) }
+
+  return(sc(res[1],res[2]))
+}
+
+ivec <- function(set, edo=globaledo) {
+  set <- set%%edo
+  set <- unique(set)
+  vec <- rep(edo+1,edo/2)
+  ivs <- outer(set, set,"-")
+  ivs2 <- (edo - ivs)
+  lowers <- ivs
+  lowers[which(ivs > ivs2)] <- ivs2[which(ivs > ivs2)]
+  nonzero <- lowers[lowers > 0]
+
+  for (i in 1:(edo/2)) {
+    vec[i] <- sum(nonzero == i)
+  }
+
+  return(vec)
+}
+
+# "equal division of the octave origin"
+edoo <- function(card, edo=globaledo) {
+  return( (0:(card-1))*(edo/card) )
+}
+
+evenness <- function(set, edo=globaledo) {
+  card <- length(set)
+  edoozero <- edoo(card) - (sum(edoo(card))/card)
+  setzero <- set - (sum(set)/card)
+  return(sqrt(sum((setzero-edoozero)^2)))
 }
