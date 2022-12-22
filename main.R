@@ -3,21 +3,21 @@ tiny <- 1e-12
 rounder <- -log(tiny)/log(10)
 fortenums <- readRDS("fortenums.rds")
 
-fpunique <- function(x,MARGIN=0,localrounder=rounder) {
+fpunique <- function(x, MARGIN=0, localrounder=rounder) {
   if (MARGIN == 0) {
-    return(x[!duplicated(round(x,localrounder))])
+    return(x[!duplicated(round(x, localrounder))])
   }
 
   if (MARGIN == 1) {
-    return(x[!duplicated( round(x,localrounder), MARGIN=1 ) , ] )
+    return(x[!duplicated( round(x, localrounder), MARGIN=1 ) , ] )
   }
 
   if (MARGIN == 2) {
-    return(x[ , !duplicated( round(x,localrounder), MARGIN=2 ) ] )
+    return(x[ , !duplicated( round(x, localrounder), MARGIN=2 ) ] )
   }
 }
 
-convert <- function(x,edo1,edo2) x*(edo2/edo1)
+convert <- function(x, edo1, edo2) x*(edo2/edo1)
 tn <- function(set, n, edo=globaledo) ((set%%edo) + (n%%edo)) %% edo
 tni <- function(set, n, edo=globaledo) sort(((n%%edo) - (set%%edo)) %% edo )
 startzero <- function(set, edo=globaledo) tn(set, -set[1], edo)
@@ -30,7 +30,7 @@ rotate <- function(x, n=1) {
 
 rotatewrap <- function(n,x) rotate(x,n)
 
-modecompare <- function(set, ref) sum(unique(sign(round(set - ref, rounder))))
+modecompare <- function(set, ref, localrounder=rounder) sum(unique(sign(round(set - ref, localrounder))))
 # Using voice-leading brightness, modecompare returns 1 if set is brighter than ref(erence),
 # -1 if set is darker than ref, and 0 if the sets are "tied" because they are identical or incomparable.
 
@@ -40,27 +40,25 @@ findmodes <- function(set, edo=globaledo) {
   return(res)
 }
 
-brightnessComps <- function(set, edo=globaledo) {
+brightnessComps <- function(set, edo=globaledo, localrounder=rounder) {
   modes <- findmodes(set, edo)
   modes <- split(modes,col(modes))
-  res <- outer(modes,modes,Vectorize(modecompare))
+  res <- outer(modes,modes,Vectorize(modecompare), localrounder=localrounder)
   return(res)
 }
 
-eps <- function(set, edo=globaledo) {
-
+eps <- function(set, edo=globaledo, localrounder=rounder) {
   modes <- t(findmodes(set,edo))
-  chart <- brightnessComps(set)*brightnessComps(set)
+  chart <- brightnessComps(set, edo, localrounder)*brightnessComps(set, edo, localrounder)
   diffs <- outer(rowSums(modes),rowSums(modes),'-')
   result <- chart * diffs
 
   return(min(result[result > 0]))
 }
 
-delta <- function(set, edo=globaledo) {
-
+delta <- function(set, edo=globaledo, localrounder=rounder) {
   modes <- t(findmodes(set, edo))
-  chart <- brightnessComps(set)*brightnessComps(set)
+  chart <- brightnessComps(set, edo, localrounder)*brightnessComps(set, edo, localrounder)
   diag(chart) <- -1
   chart <- (chart + 1)%%2
 
@@ -70,7 +68,9 @@ delta <- function(set, edo=globaledo) {
   return(max(result))
 }
 
-ratio <- function(set, edo=globaledo) { return(delta(set, edo)/eps(set, edo)) }
+ratio <- function(set, edo=globaledo, localrounder=rounder) {
+  return(delta(set, edo, localrounder)/eps(set, edo, localrounder))
+}
 
 sc <- function(card,num) {
   set <- fortenums[[card]][num]
@@ -219,7 +219,29 @@ edoo <- function(card, edo=globaledo) {
 
 evenness <- function(set, edo=globaledo) {
   card <- length(set)
-  edoozero <- edoo(card) - (sum(edoo(card))/card)
+  edoozero <- edoo(card, edo) - (sum(edoo(card, edo))/card)
   setzero <- set - (sum(set)/card)
   return(sqrt(sum((setzero-edoozero)^2)))
+}
+
+saturate <- function(r, set, edo=globaledo) {
+  card <- length(set)
+  origin <- edoo(card, edo)
+  vec <- origin + r*(set-origin)
+
+  return(vec)
+}
+
+asword <- function(set, edo=globaledo, localrounder=rounder) {
+  card <- length(set)
+  result <- rep(0,card)
+
+  setsteps <- findmodes(set, edo)[2, ]
+  stepvals <- sort(fpunique(setsteps, 0, localrounder))
+
+  for (i in 1:card) {
+    result[which(abs(setsteps - stepvals[i]) < 10^(-1*localrounder) )] <- i
+  }
+
+  return(result)
 }
