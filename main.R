@@ -199,7 +199,7 @@ ivec <- function(set, edo=globaledo) {
   set <- set%%edo
   set <- unique(set)
   vec <- rep(edo+1,edo/2)
-  ivs <- outer(set, set,"-")
+  ivs <- outer(set, set, "-")
   ivs2 <- (edo - ivs)
   lowers <- ivs
   lowers[which(ivs > ivs2)] <- ivs2[which(ivs > ivs2)]
