@@ -18,9 +18,20 @@ fpunique <- function(x, MARGIN=0, rounder=globalrounder) {
 }
 
 convert <- function(x, edo1, edo2) x*(edo2/edo1)
-tn <- function(set, n, edo=globaledo) ((set%%edo) + (n%%edo)) %% edo
-tni <- function(set, n, edo=globaledo) sort(((n%%edo) - (set%%edo)) %% edo )
-startzero <- function(set, edo=globaledo) tn(set, -set[1], edo)
+
+tn <- function(set, n, edo=globaledo, sorted=TRUE) {
+  res <- ((set%%edo) + (n%%edo)) %% edo
+  if (sorted == FALSE) { return(res) }
+  return(sort(res))
+}
+
+tni <- function(set, n, edo=globaledo, sorted=TRUE) {
+  res <- ((n%%edo) - (set%%edo)) %% edo
+  if (sorted == FALSE) { return(res) }
+  return(sort(res))
+}
+
+startzero <- function(set, edo=globaledo, sorted=TRUE) tn(set, -set[1], edo, sorted)
 
 rotate <- function(x, n=1) {
   len <- length(x)
@@ -79,8 +90,8 @@ sc <- function(card,num) {
   return(res)
 }
 
-normalorder <- function(set, edo=globaledo) {
-  set <- sort(set)
+tnprime <- function(set, edo=globaledo) {
+  set <- sort(set %% edo)
   card <- length(set)
   if (card == 1) { return(0) }
   if (card == 0) { return(integer(0))}
@@ -114,14 +125,15 @@ setcompare <- function(x,y) {
 }
 
 primeform <- function(set, edo=globaledo) {
-  upset <- startzero(normalorder(set, edo))
-  downset <- startzero(normalorder(tni(set,0, edo), edo))
+  if (length(set)==1) { return(0) }
+  upset <- startzero(tnprime(set, edo))
+  downset <- startzero(tnprime(tni(set, 0, edo), edo))
   winner <- setcompare(upset, downset)
   return(winner)
 }
 
 charm <- function(set, edo=globaledo) {
-  return(normalorder(tni(set,0, edo), edo))
+  return(tnprime(tni(set, 0, edo), edo))
 }
 
 #set-class complemnent
