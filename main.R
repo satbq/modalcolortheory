@@ -1,19 +1,19 @@
 globaledo <- 12
 tiny <- 1e-12
-rounder <- -log(tiny)/log(10)
+globalrounder <- -log(tiny)/log(10)
 fortenums <- readRDS("fortenums.rds")
 
-fpunique <- function(x, MARGIN=0, localrounder=rounder) {
+fpunique <- function(x, MARGIN=0, rounder=globalrounder) {
   if (MARGIN == 0) {
-    return(x[!duplicated(round(x, localrounder))])
+    return(x[!duplicated(round(x, rounder))])
   }
 
   if (MARGIN == 1) {
-    return(x[!duplicated( round(x, localrounder), MARGIN=1 ) , ] )
+    return(x[!duplicated( round(x, rounder), MARGIN=1 ) , ] )
   }
 
   if (MARGIN == 2) {
-    return(x[ , !duplicated( round(x, localrounder), MARGIN=2 ) ] )
+    return(x[ , !duplicated( round(x, rounder), MARGIN=2 ) ] )
   }
 }
 
@@ -30,35 +30,36 @@ rotate <- function(x, n=1) {
 
 rotatewrap <- function(n,x) rotate(x,n)
 
-modecompare <- function(set, ref, localrounder=rounder) sum(unique(sign(round(set - ref, localrounder))))
+modecompare <- function(set, ref, rounder=globalrounder) sum(unique(sign(round(set - ref, rounder))))
 # Using voice-leading brightness, modecompare returns 1 if set is brighter than ref(erence),
 # -1 if set is darker than ref, and 0 if the sets are "tied" because they are identical or incomparable.
 
-findmodes <- function(set, edo=globaledo) {
+# sim = scalar interval matrix
+sim <- function(set, edo=globaledo) {
   res <- sapply(0:(length(set)-1), rotatewrap, x=set)
   res <- apply(res, 2, startzero, edo)
   return(res)
 }
 
-brightnessComps <- function(set, edo=globaledo, localrounder=rounder) {
-  modes <- findmodes(set, edo)
+brightnessComps <- function(set, edo=globaledo, rounder=globalrounder) {
+  modes <- sim(set, edo)
   modes <- split(modes,col(modes))
-  res <- outer(modes,modes,Vectorize(modecompare), localrounder=localrounder)
+  res <- outer(modes,modes,Vectorize(modecompare), rounder=rounder)
   return(res)
 }
 
-eps <- function(set, edo=globaledo, localrounder=rounder) {
-  modes <- t(findmodes(set,edo))
-  chart <- brightnessComps(set, edo, localrounder)*brightnessComps(set, edo, localrounder)
+eps <- function(set, edo=globaledo, rounder=globalrounder) {
+  modes <- t(sim(set, edo))
+  chart <- brightnessComps(set, edo, rounder)*brightnessComps(set, edo, rounder)
   diffs <- outer(rowSums(modes),rowSums(modes),'-')
   result <- chart * diffs
 
   return(min(result[result > 0]))
 }
 
-delta <- function(set, edo=globaledo, localrounder=rounder) {
-  modes <- t(findmodes(set, edo))
-  chart <- brightnessComps(set, edo, localrounder)*brightnessComps(set, edo, localrounder)
+delta <- function(set, edo=globaledo, rounder=globalrounder) {
+  modes <- t(sim(set, edo))
+  chart <- brightnessComps(set, edo, rounder)*brightnessComps(set, edo, rounder)
   diag(chart) <- -1
   chart <- (chart + 1)%%2
 
@@ -68,8 +69,8 @@ delta <- function(set, edo=globaledo, localrounder=rounder) {
   return(max(result))
 }
 
-ratio <- function(set, edo=globaledo, localrounder=rounder) {
-  return(delta(set, edo, localrounder)/eps(set, edo, localrounder))
+ratio <- function(set, edo=globaledo, rounder=globalrounder) {
+  return(delta(set, edo, rounder)/eps(set, edo, rounder))
 }
 
 sc <- function(card,num) {
@@ -83,7 +84,7 @@ normalorder <- function(set, edo=globaledo) {
   card <- length(set)
   if (card == 1) { return(0) }
   if (card == 0) { return(integer(0))}
-  modes <- findmodes(set, edo)
+  modes <- sim(set, edo)
 
   for (i in card:1) {
      if (class(modes)[1]=="numeric") {return(modes)}
@@ -123,6 +124,7 @@ charm <- function(set, edo=globaledo) {
   return(normalorder(tni(set,0, edo), edo))
 }
 
+#set-class complemnent
 scComp <- function(set,edo=globaledo) {
   return(primeform(setdiff(0:(edo-1),set),edo))
 }
@@ -232,15 +234,15 @@ saturate <- function(r, set, edo=globaledo) {
   return(vec)
 }
 
-asword <- function(set, edo=globaledo, localrounder=rounder) {
+asword <- function(set, edo=globaledo, rounder=globalrounder) {
   card <- length(set)
   result <- rep(0,card)
 
-  setsteps <- findmodes(set, edo)[2, ]
-  stepvals <- sort(fpunique(setsteps, 0, localrounder))
+  setsteps <- sim(set, edo)[2, ]
+  stepvals <- sort(fpunique(setsteps, 0, rounder))
 
   for (i in 1:card) {
-    result[which(abs(setsteps - stepvals[i]) < 10^(-1*localrounder) )] <- i
+    result[which(abs(setsteps - stepvals[i]) < 10^(-1*rounder) )] <- i
   }
 
   return(result)
