@@ -263,9 +263,10 @@ asword <- function(set, edo=globaledo, rounder=globalrounder) {
 intervalspectrum <- function(set, edo=globaledo, rounder=globalrounder) {
   modes <- sim(set, edo)
   uniques <- apply(modes,1,fpunique, rounder=rounder)
-  return(sapply(uniques,length))
+  return(uniques)
 }
 
+spectrumcount <- function(set, edo=globaledo, rounder=globalrounder) sapply(intervalspectrum(set,edo,rounder),length)
 
 diatonicsubsets <- function(subsetdegrees,set,uniq=TRUE,edo=globaledo,rounder=globalrounder) {
   modes <- sim(set,edo=edo)
@@ -306,4 +307,16 @@ subsetspectrum <- function(set,subsetcard,simplify=TRUE,mode="tn",edo=globaledo,
 
   names(res) <- apply(comb,2,toString)
   return(res)
+}
+
+isym <- function(set, edo=globaledo, rounder=globalrounder) {
+  card <- length(set)
+  setword <- asword(set, edo, rounder)
+  invsetword <- rev(setword)
+
+  for (i in 1:card) {
+    invmode <- rotate(invsetword,i)
+    if ( isTRUE(all.equal(setword,invmode)) ) { return(TRUE) }
+  }
+  return(FALSE)
 }
