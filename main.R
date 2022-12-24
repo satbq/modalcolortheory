@@ -259,3 +259,51 @@ asword <- function(set, edo=globaledo, rounder=globalrounder) {
 
   return(result)
 }
+
+intervalspectrum <- function(set, edo=globaledo, rounder=globalrounder) {
+  modes <- sim(set, edo)
+  uniques <- apply(modes,1,fpunique, rounder=rounder)
+  return(sapply(uniques,length))
+}
+
+
+diatonicsubsets <- function(subsetdegrees,set,uniq=TRUE,edo=globaledo,rounder=globalrounder) {
+  modes <- sim(set,edo=edo)
+  subsetdegrees <- subsetdegrees + 1 #Because in music theory these are 0-indexed, but vectors are 1-indexed in R
+  res <- modes[subsetdegrees,]
+
+  if (uniq == TRUE) {
+  res <- fpunique(res, MARGIN=2, rounder=rounder)
+  }
+
+  return(res)
+}
+
+subsetspectrum <- function(set,subsetcard,simplify=TRUE,mode="tn",edo=globaledo,rounder=globalrounder) { #Returns a list
+  # edosave <- edo
+  card <- length(set)
+  comb <- combn(card-1,subsetcard-1)
+  comb <- rbind(rep(0,choose(card-1,subsetcard-1)),comb)
+
+  if (mode=="tn") { use <- tnprime }
+  if (mode=="tni") { use <- primeform }
+
+  if (simplify == TRUE) {
+    # edo <<- card
+    comb <- fpunique(apply(comb,2,use,edo=card),MARGIN=2,rounder=rounder)
+    # edo <<- edosave
+  }
+
+  res <- apply(comb,2,diatonicsubsets,set=set,edo=edo,rounder=rounder)
+
+  if ("matrix" %in% class(res)) {	#This is necessary because if all subsets have same variety, apply() returns a matrix, not a list
+    res <- as.list(as.data.frame(res))
+
+    for (i in 1:length(res) ) {
+       res[[i]] <- matrix(res[[i]],nrow=subsetcard,ncol=(length(res[[i]])/subsetcard))
+    }
+  }
+
+  names(res) <- apply(comb,2,toString)
+  return(res)
+}
