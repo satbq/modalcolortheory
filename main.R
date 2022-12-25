@@ -320,3 +320,45 @@ isym <- function(set, edo=globaledo, rounder=globalrounder) {
   }
   return(FALSE)
 }
+
+
+makesubmatold <- function(card) {
+  submat <- matrix("",card,card)
+
+  for (i in 0:(card-1)) {
+    submat[(i+1),] <- rep(paste0("-",i),card)
+  }
+
+  for (i in 1:card) {
+    prefixes <- 0:(card-1)
+    prefixes <- rotate(prefixes,(i-1))
+
+    for (j in 1:card) {
+      submat[i,j] <- paste0(prefixes[j], submat[i,j])
+    }
+  }
+
+  for (i in 1:card) {
+    for (j in 1:card) {
+      if ((i+j)>(card+1)) { submat[i,j] <- paste0("w+", submat[i,j])}
+    }
+  }
+  return(submat)
+}
+
+#MUCH faster than the original loop-based version
+makesubmat <- function(card) {
+  submat <- t(outer(0:(card-1), 0:(card-1), paste, sep="-"))
+
+  rotaterow <- function(n,mat) rotate(mat[n,], n-1)
+  submat <- t(sapply(1:card, rotaterow,mat=submat))
+
+  submat <- submat[,card:1]
+  submat[lower.tri(submat)] <- mapply(paste0, "w+", submat[lower.tri(submat)])
+  submat <- submat[,card:1]
+
+  return(submat)
+}
+
+
+
