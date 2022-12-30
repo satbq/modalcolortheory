@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9bfe4c91-a0a2-4f28-b4bb-3b85d78e6d47" name="Changes" comment="non-loop version of submat">
+    <list default="true" id="9bfe4c91-a0a2-4f28-b4bb-3b85d78e6d47" name="Changes" comment="makeineqmat2 -- a vectorized, much-faster, and more transparent version of makeineqmat.">
+      <change afterPath="$PROJECT_DIR$/ineqmatsold.rds" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ineqmats.rds" beforeDir="false" afterPath="$PROJECT_DIR$/ineqmats.rds" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.R" beforeDir="false" afterPath="$PROJECT_DIR$/main.R" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -17,12 +19,15 @@
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectId" id="2JFcyf7QyrGRqrdONwlVewlcs3d" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
   </component>
@@ -42,7 +47,14 @@
       <option name="project" value="LOCAL" />
       <updated>1671927855482</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="makeineqmat2 -- a vectorized, much-faster, and more transparent version of makeineqmat.">
+      <created>1672391629146</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1672391629146</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -57,7 +69,9 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="non-loop version of submat" />
-    <option name="LAST_COMMIT_MESSAGE" value="non-loop version of submat" />
+    <MESSAGE value="makeineqmat2 -- a vectorized, much-faster, and more transparent version of makeineqmat." />
+    <option name="LAST_COMMIT_MESSAGE" value="makeineqmat2 -- a vectorized, much-faster, and more transparent version of makeineqmat." />
   </component>
 </project>

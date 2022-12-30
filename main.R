@@ -361,7 +361,7 @@ makesubmat <- function(card) {
   return(submat)
 }
 
-makeineqmat <- function(card) {
+makeineqmatold <- function(card) {
   # This is fairly slow. Not intended for repeated use: look up precalculated results with getineqmat!
   ineqmat <- rep(0,(card+1))
   ineqmat <- rbind(ineqmat,ineqmat)
@@ -440,7 +440,9 @@ makeineqmat <- function(card) {
   return(ineqmat)
 }
 
-makeineqmat2 <- function(card) {
+makeineqmat <- function(card) {
+  # Creates a row for the inequality matrix, given the "roots" of the two intervals to be compared
+  # (specified as zero-indexed scale degrees) and the generic size of the interval (zero-indexed).
   generateRow <- function(firstroot, secondroot, genericival) {
     row <- rep(0, card+1)
     if ((secondroot %% card) <= firstroot) { return(row) }
@@ -448,6 +450,9 @@ makeineqmat2 <- function(card) {
     row[(secondroot %% card)+1] <- row[(secondroot %% card)+1] + 1
     row[((firstroot + genericival) %% card) + 1] <- row[((firstroot + genericival) %% card) + 1] + 1
     row[((secondroot + genericival) %% card)+1] <- row[((secondroot + genericival) %% card)+1] - 1
+
+    # Last column of the inequality matrix reflects whether the intervals in the comparison wrap around the octave.
+    # For instance, comparing do-re to ti-do requires adding 12 to the higher do.
     w <- ((firstroot + genericival) >= card) - ((secondroot + genericival) >= card)
     row[card+1] <- w
     return(row)
@@ -456,17 +461,25 @@ makeineqmat2 <- function(card) {
   roots <- 0:(card-1)
   intervals <- 1:(card/2)
 
+  # Create all possible combinations of roots and interval sizes.
   combinations <- expand.grid(roots, roots, intervals)
   firstroots <- combinations[,1]
   secondroots <- combinations[,2]
   genericintervals <- combinations[,3]
 
+  # Generate rows from all the combinations; many will be redundant.
   res <- t(mapply(generateRow, firstroot=firstroots, secondroot=secondroots, genericival=genericintervals))
 
+  # Next two lines guarantee that we'll only generate each hyperplane in one orientation.
+  # (We don't want to have separate hyperplanes for "first step bigger than second step" and "first step smaller...")
+  # So arbitrarily we require the first nonzero entry of a row to be negative.
   rowSign <- function(row) row * -1 * sign(row[which(row!=0)])[1]
-
   res <- t(apply(res, 1, rowSign))
+
+  # Remove redundant rows.
   res <- res[!duplicated(res, MARGIN=1),]
+
+  # First row was all 0s -- unisons are identical -- so remove it.
   res <- res[-1,]
 
   return(res)
@@ -476,7 +489,7 @@ if (FALSE) {
   # The code that generates ineqmats.rds. No need to run!
   ineqmats <- list()
   ineqmats[[1]] <- integer(0)
-  for (i in 2:24) {
+  for (i in 2:53) {
     time1 <- Sys.time()
     ineqmats[[i]] <- makeineqmat(i)
     time2 <- Sys.time()
