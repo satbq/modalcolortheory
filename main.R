@@ -2,6 +2,7 @@ globaledo <- 12
 tiny <- 1e-12
 globalrounder <- -log(tiny)/log(10)
 fortenums <- readRDS("fortenums.rds")
+ineqmats <- readRDS("ineqmats.rds")
 
 fpunique <- function(x, MARGIN=0, rounder=globalrounder) {
   if (MARGIN == 0) {
@@ -437,6 +438,38 @@ makeineqmat <- function(card) {
   ineqmat <- ineqmat[-(1:2),]
   row.names(ineqmat) <- NULL
   return(ineqmat)
+}
+
+makeineqmat2 <- function(card) {
+  generateRow <- function(firstroot, secondroot, genericival) {
+    row <- rep(0, card+1)
+    if ((secondroot %% card) <= firstroot) { return(row) }
+    row[(firstroot %% card)+1] <- row[(firstroot %% card)+1] - 1
+    row[(secondroot %% card)+1] <- row[(secondroot %% card)+1] + 1
+    row[((firstroot + genericival) %% card) + 1] <- row[((firstroot + genericival) %% card) + 1] + 1
+    row[((secondroot + genericival) %% card)+1] <- row[((secondroot + genericival) %% card)+1] - 1
+    w <- ((firstroot + genericival) >= card) - ((secondroot + genericival) >= card)
+    row[card+1] <- w
+    return(row)
+  }
+
+  roots <- 0:(card-1)
+  intervals <- 1:(card/2)
+
+  combinations <- expand.grid(roots, roots, intervals)
+  firstroots <- combinations[,1]
+  secondroots <- combinations[,2]
+  genericintervals <- combinations[,3]
+
+  res <- t(mapply(generateRow, firstroot=firstroots, secondroot=secondroots, genericival=genericintervals))
+
+  rowSign <- function(row) row * -1 * sign(row[which(row!=0)])[1]
+
+  res <- t(apply(res, 1, rowSign))
+  res <- res[!duplicated(res, MARGIN=1),]
+  res <- res[-1,]
+
+  return(res)
 }
 
 if (FALSE) {
