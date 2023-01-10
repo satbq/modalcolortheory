@@ -521,7 +521,79 @@ sineqr <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
   return(as.vector(res))
 }
 
-countsineqrzeros <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
+whichsineqrzeroes <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
   siqr <- sineqr(set, ineqmat, edo, rounder)
-  return(length(which(siqr == 0)))
+  return(which(siqr == 0))
+}
+
+countsineqrzeroes <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
+  siqrzeroes <- whichsineqrzeroes(set, ineqmat, edo, rounder)
+  return(length(siqrzeroes))
+}
+
+howfree <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
+  card <- length(set)
+
+  if (is.null(ineqmat)) {
+    ineqmat <- getineqmat(card)
+  }
+
+  zeroesflat <- ineqmat[whichsineqrzeroes(set, ineqmat, edo, rounder),]
+  rank <- qr(zeroesflat)$rank
+  freedom <- card - (1+rank)
+  return(freedom)
+}
+
+# Checks relationship between two sineqrs. If identical returns 0; if adjacent regions, returns 1; otherwise returns -1.
+comparesineqrs <- function(sineqrX,sineqrY) {
+  # Are the sineqrs identical?
+  if ( isTRUE(all.equal(sineqrX,sineqrY)) ) { return(0) }
+
+  # Initial sorting based on which hyperplanes the scales lie on.
+  sineqr.zeroes.x <- which(sineqrX == 0)
+  sineqr.zeroes.y <- which(sineqrY == 0)
+
+  numzeroes.x <- length(sineqr.zeroes.x)
+  numzeroes.y <- length(sineqr.zeroes.y)
+
+  # Distinct colors can't be adjacent if lie on same number of hyperplanes.
+  if (numzeroes.x == numzeroes.y) {
+    return(-1)
+  }
+
+  # Which scale lies on more hyperplanes?
+  if (numzeroes.x > numzeroes.y) {
+    upper <- sineqrX
+    upper.zeroes <- sineqr.zeroes.x
+    lower <- sineqrY
+    lower.zeroes <- sineqr.zeroes.y
+  }
+
+  if (numzeroes.x < numzeroes.y) {
+    upper <- sineqrY
+    upper.zeroes <- sineqr.zeroes.y
+    lower <- sineqrX
+    lower.zeroes <- sineqr.zeroes.x
+  }
+
+  # To be adjacent, a freer region must lie on all the hyperplanes of the stricter region.
+  check.zeroes <- lower.zeroes %in% upper.zeroes
+  if ( prod(check.zeroes) == 0 ) {
+    return(-1)
+  }
+
+  # We've weeded out the obvious cases based on scales lying **on** hyperplanes.
+  # Now we have to check the hyperplanes that the scales lie above/below.
+  siqdiff <- sineqrX - sineqrY
+
+  # If both scales lie off a hyperplane, to be adjacent they should lie in the same direction (diff of 0).
+  # But the freer region can step "up" or "down" off a hyperplane of the stricter region (diff of +1 or -1).
+  # So what we need to catch are cases where one scale lies above & the other lies below a hyerplane,
+  # which shows up as a difference of +2 or -2 in the siqdiff.
+  difftypes <- unique(abs(siqdiff))
+
+  # Want to return -1 if +/-2 is present, else 1 if +/-1 is present, and 0 if identical.
+  index <- max(difftypes)
+  res <- ((2*index)%%3)-index
+  return(res)
 }
