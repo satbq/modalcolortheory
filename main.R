@@ -510,7 +510,7 @@ getineqmat <- function(card) {
   }
 }
 
-sineqr <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
+signvector <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
   if (is.null(ineqmat)) {
     card <- length(set)
     ineqmat <- getineqmat(card)
@@ -521,14 +521,14 @@ sineqr <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
   return(as.vector(res))
 }
 
-whichsineqrzeroes <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
-  siqr <- sineqr(set, ineqmat, edo, rounder)
-  return(which(siqr == 0))
+whichsvzeroes <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
+  signvec <- signvector(set, ineqmat, edo, rounder)
+  return(which(signvec == 0))
 }
 
-countsineqrzeroes <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
-  siqrzeroes <- whichsineqrzeroes(set, ineqmat, edo, rounder)
-  return(length(siqrzeroes))
+countsvzeroes <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
+  signveczeroes <- whichsvzeroes(set, ineqmat, edo, rounder)
+  return(length(signveczeroes))
 }
 
 howfree <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
@@ -538,23 +538,23 @@ howfree <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
     ineqmat <- getineqmat(card)
   }
 
-  zeroesflat <- ineqmat[whichsineqrzeroes(set, ineqmat, edo, rounder),]
+  zeroesflat <- ineqmat[whichsvzeroes(set, ineqmat, edo, rounder),]
   rank <- qr(zeroesflat)$rank
   freedom <- card - (1+rank)
   return(freedom)
 }
 
-# Checks relationship between two sineqrs. If identical returns 0; if adjacent regions, returns 1; otherwise returns -1.
-comparesineqrs <- function(sineqrX,sineqrY) {
-  # Are the sineqrs identical?
-  if ( isTRUE(all.equal(sineqrX,sineqrY)) ) { return(0) }
+# Checks relationship between two signvecs. If identical returns 0; if adjacent regions, returns 1; otherwise returns -1.
+comparesignvecs <- function(signvecX, signvecY) {
+  # Are the signvecs identical?
+  if ( isTRUE(all.equal(signvecX,signvecY)) ) { return(0) }
 
   # Initial sorting based on which hyperplanes the scales lie on.
-  sineqr.zeroes.x <- which(sineqrX == 0)
-  sineqr.zeroes.y <- which(sineqrY == 0)
+  signvec.zeroes.x <- which(signvecX == 0)
+  signvec.zeroes.y <- which(signvecY == 0)
 
-  numzeroes.x <- length(sineqr.zeroes.x)
-  numzeroes.y <- length(sineqr.zeroes.y)
+  numzeroes.x <- length(signvec.zeroes.x)
+  numzeroes.y <- length(signvec.zeroes.y)
 
   # Distinct colors can't be adjacent if lie on same number of hyperplanes.
   if (numzeroes.x == numzeroes.y) {
@@ -563,17 +563,17 @@ comparesineqrs <- function(sineqrX,sineqrY) {
 
   # Which scale lies on more hyperplanes?
   if (numzeroes.x > numzeroes.y) {
-    upper <- sineqrX
-    upper.zeroes <- sineqr.zeroes.x
-    lower <- sineqrY
-    lower.zeroes <- sineqr.zeroes.y
+    upper <- signvecX
+    upper.zeroes <- signvec.zeroes.x
+    lower <- signvecY
+    lower.zeroes <- signvec.zeroes.y
   }
 
   if (numzeroes.x < numzeroes.y) {
-    upper <- sineqrY
-    upper.zeroes <- sineqr.zeroes.y
-    lower <- sineqrX
-    lower.zeroes <- sineqr.zeroes.x
+    upper <- signvecY
+    upper.zeroes <- signvec.zeroes.y
+    lower <- signvecX
+    lower.zeroes <- signvec.zeroes.x
   }
 
   # To be adjacent, a freer region must lie on all the hyperplanes of the stricter region.
@@ -584,13 +584,13 @@ comparesineqrs <- function(sineqrX,sineqrY) {
 
   # We've weeded out the obvious cases based on scales lying **on** hyperplanes.
   # Now we have to check the hyperplanes that the scales lie above/below.
-  siqdiff <- sineqrX - sineqrY
+  svdiff <- signvecX - signvecY
 
   # If both scales lie off a hyperplane, to be adjacent they should lie in the same direction (diff of 0).
   # But the freer region can step "up" or "down" off a hyperplane of the stricter region (diff of +1 or -1).
   # So what we need to catch are cases where one scale lies above & the other lies below a hyerplane,
-  # which shows up as a difference of +2 or -2 in the siqdiff.
-  difftypes <- unique(abs(siqdiff))
+  # which shows up as a difference of +2 or -2 in the svdiff.
+  difftypes <- unique(abs(svdiff))
 
   # Want to return -1 if +/-2 is present, else 1 if +/-1 is present, and 0 if identical.
   index <- max(difftypes)
