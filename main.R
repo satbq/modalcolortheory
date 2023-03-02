@@ -597,3 +597,11 @@ comparesignvecs <- function(signvecX, signvecY) {
   res <- ((2*index)%%3)-index
   return(res)
 }
+
+iswellformed <- function(set, setword=NULL, allowdegen=FALSE, edo=globaledo, rounder=globalrounder) {
+  if ( is.null(set) ) {
+    set <- cumsum(setword)
+    wordedo <- set[length(set)]
+    set <- convert(sort(set %% wordedo), wordedo, edo)
+  }
+}
