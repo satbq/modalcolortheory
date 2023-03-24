@@ -49,7 +49,7 @@ modecompare <- function(set, ref, rounder=globalrounder) sum(unique(sign(round(s
 # sim = scalar interval matrix
 sim <- function(set, edo=globaledo) {
   res <- sapply(0:(length(set)-1), rotatewrap, x=set)
-  res <- apply(res, 2, startzero, edo)
+  res <- apply(res, 2, startzero, edo, sorted=FALSE)
   return(res)
 }
 
@@ -127,8 +127,8 @@ setcompare <- function(x,y) {
 
 primeform <- function(set, edo=globaledo) {
   if (length(set)==1) { return(0) }
-  upset <- startzero(tnprime(set, edo))
-  downset <- startzero(tnprime(tni(set, 0, edo), edo))
+  upset <- startzero(tnprime(set, edo), edo)
+  downset <- startzero(tnprime(tni(set, 0, edo), edo), edo)
   winner <- setcompare(upset, downset)
   return(winner)
 }
@@ -230,6 +230,17 @@ ivec <- function(set, edo=globaledo) {
 # "equal division of the octave origin"
 edoo <- function(card, edo=globaledo) {
   return( (0:(card-1))*(edo/card) )
+}
+
+# "maximally even MOS"
+makeMEMOS <- function(card, edo=globaledo, floor=TRUE) {
+  if (floor==TRUE) {
+    res <- primeform(floor(edoo(card, edo)), edo)
+  } else {
+    res <- primeform(round(edoo(card, edo), digits=0), edo)
+  }
+
+  return(res)
 }
 
 evenness <- function(set, edo=globaledo) {
@@ -598,10 +609,54 @@ comparesignvecs <- function(signvecX, signvecY) {
   return(res)
 }
 
-iswellformed <- function(set, setword=NULL, allowdegen=FALSE, edo=globaledo, rounder=globalrounder) {
-  if ( is.null(set) ) {
-    set <- cumsum(setword)
-    wordedo <- set[length(set)]
-    set <- convert(sort(set %% wordedo), wordedo, edo)
-  }
+realize_setword <- function(setword, edo=globaledo) {
+  set <- cumsum(setword)
+  wordedo <- set[length(set)]
+  set <- convert(sort(set %% wordedo), wordedo, edo)
+  return(set)
 }
+
+iswellformed <- function(set, setword=NULL, allowdegen=FALSE, edo=globaledo, rounder=globalrounder) {
+  if ( is.null(set) ) { set <- realize_setword(setword, edo) }
+  speccount <- spectrumcount(set, edo, rounder)[-1]
+  uniques <- unique(speccount)
+  if (toString(uniques)=="2") { return(TRUE) }
+  if (toString(uniques)=="1") { return(as.logical(allowdegen)) }
+  if (toString(sort(uniques))=="1, 2") { return(as.logical(allowdegen)) }
+
+  return(FALSE)
+}
+
+equivocate <- function(setword, lowerbound, windowsize) {
+  highest <- max(setword)
+  toMatch <- lowerbound:(lowerbound+(windowsize-1))
+  toMatch <- unique(((toMatch-1)%%highest)+1)
+  replacement_positions <- which(setword %in% toMatch)
+  result <- replace(setword, replacement_positions, 1)
+  result <- replace(result, -replacement_positions, 2)
+  return(result)
+}
+
+isgwf <- function(set, setword=NULL,allowdegen=FALSE,edo=globaledo,rounder=globalrounder) {
+# Note that this requires that the "letters" of a setword are consecutive integers,
+# such that max(letters) == len(unique(letters)). That is, a word on 3 letters should have the letters 1, 2, and 3.
+  if ( is.null(setword) ) { setword <- asword(set, edo, rounder) }
+  if (anyNA(setword)) { return(FALSE) }
+
+  highest <- max(setword)
+  equiv_parameters <- expand.grid(1:highest, 1:(highest-1))
+
+  equiv_wrap <- function(params, setword) equivocate(setword, params[1], params[2])
+  reduced_words <- apply(equiv_parameters, 1, equiv_wrap, setword=setword)
+
+  iswf_wrap <- function(setword, allowdegen, edo, rounder)  {
+    return(iswellformed(NULL, setword, allowdegen, edo, rounder))
+  }
+
+  tests <- apply(reduced_words,2, iswf_wrap, allowdegen=allowdegen, edo=edo, rounder=rounder)
+
+  return(as.logical(prod(tests)))
+}
+
+
+
