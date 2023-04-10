@@ -22,9 +22,8 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9bfe4c91-a0a2-4f28-b4bb-3b85d78e6d47" name="Changes" comment="makeineqmat2 -- a vectorized, much-faster, and more transparent version of makeineqmat.">
+    <list default="true" id="9bfe4c91-a0a2-4f28-b4bb-3b85d78e6d47" name="Changes" comment="created isgwf; fix sim so that it doesn't inadvertently change colors by sorting an 'out of order' set">
       <change beforePath="$PROJECT_DIR$/.idea/rGraphicsSettings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/rGraphicsSettings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/rSettings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/rSettings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.R" beforeDir="false" afterPath="$PROJECT_DIR$/main.R" afterDir="false" />
     </list>
@@ -73,7 +72,14 @@
       <option name="project" value="LOCAL" />
       <updated>1672391629146</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="created isgwf; fix sim so that it doesn't inadvertently change colors by sorting an 'out of order' set">
+      <created>1679630637548</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1679630637548</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -92,9 +98,14 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="non-loop version of submat" />
     <MESSAGE value="makeineqmat2 -- a vectorized, much-faster, and more transparent version of makeineqmat." />
-    <option name="LAST_COMMIT_MESSAGE" value="makeineqmat2 -- a vectorized, much-faster, and more transparent version of makeineqmat." />
+    <MESSAGE value="created isgwf; fix sim so that it doesn't inadvertently change colors by sorting an 'out of order' set" />
+    <option name="LAST_COMMIT_MESSAGE" value="created isgwf; fix sim so that it doesn't inadvertently change colors by sorting an 'out of order' set" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1680705872590">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040/-1600.0.1600.860@0.0.1920.1040" timestamp="1680705872590" />
     <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1677795907148">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

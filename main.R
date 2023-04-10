@@ -658,5 +658,16 @@ isgwf <- function(set, setword=NULL,allowdegen=FALSE,edo=globaledo,rounder=globa
   return(as.logical(prod(tests)))
 }
 
+OPTC_test <- function(set, edo=globaledo, rounder=globalrounder, single_answer=TRUE) {
+  basically_zero <- 10^(-rounder)
+  step_sizes <- sim(set)[2,]
 
+  satisfies_O <- (max(set) < edo)
+  satisfies_P <- isTRUE( all.equal(set, sort(set), tolerance=basically_zero) )
+  satisfies_T <- abs(set[1]) < basically_zero
+  satisfies_C <- min(step_sizes) > basically_zero
+
+  if (single_answer == FALSE) { return(c(satisfies_O, satisfies_P, satisfies_T, satisfies_C)) }
+  return(satisfies_O && satisfies_P && satisfies_T && satisfies_C)
+}
 
