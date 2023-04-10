@@ -671,7 +671,7 @@ OPTC_test <- function(set, edo=globaledo, rounder=globalrounder, single_answer=T
   return(satisfies_O && satisfies_P && satisfies_T && satisfies_C)
 }
 
-realize_signvec <- function(set,nmax=12,reconvert=FALSE,edo=globaledo,rounder=globalrounder) {
+quantize_color <- function(set,nmax=12,reconvert=FALSE,edo=globaledo,rounder=globalrounder) {
   card <- length(set)
   signvec <- signvector(set,edo=edo,rounder=rounder)
 
