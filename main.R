@@ -662,7 +662,7 @@ OPTC_test <- function(set, edo=globaledo, rounder=globalrounder, single_answer=T
   basically_zero <- 10^(-rounder)
   step_sizes <- sim(set)[2,]
 
-  satisfies_O <- (max(set) < edo)
+  satisfies_O <- max(set) < edo
   satisfies_P <- isTRUE( all.equal(set, sort(set), tolerance=basically_zero) )
   satisfies_T <- abs(set[1]) < basically_zero
   satisfies_C <- min(step_sizes) > basically_zero
@@ -671,3 +671,50 @@ OPTC_test <- function(set, edo=globaledo, rounder=globalrounder, single_answer=T
   return(satisfies_O && satisfies_P && satisfies_T && satisfies_C)
 }
 
+realize_signvec <- function(set,nmax=12,reconvert=FALSE,edo=globaledo,rounder=globalrounder) {
+  card <- length(set)
+  signvec <- signvector(set,edo=edo,rounder=rounder)
+
+  word <- asword(set, edo, rounder)
+  letters <- sort(unique(word),decreasing=FALSE)
+
+  startedo <- sum(word)
+
+  current_set <- cumsum(c(0,word))[1:card]
+
+  if (isTRUE(all.equal(signvector(current_set, edo, rounder), signvec))) {
+    result_list <- list(set=curset, edo=startedo)
+    if (reconvert==TRUE) {
+      return(convert(result_list$"set", result_list$"edo", edo))
+    } else {
+      return(result_list)
+    }
+  }
+
+  options <- combn(nmax,length(letters))
+  stop <- dim(options)[2]
+
+  for (i in 1:stop) {
+      newletters <- options[,i]
+      res <- word
+
+    for (j in seq_along(letters)) {
+      res <- replace(res, which(word==letters[j]), newletters[j])
+    }
+
+    current_edo <- sum(res)
+    current_set <- cumsum(c(0,res))[1:card]
+
+    current_signvec <- signvector(current_set, edo=current_edo, rounder=rounder)
+
+    if (isTRUE(all.equal(current_signvec, signvec))) {
+          result_list <- list(set=current_set, edo=current_edo)
+          if (reconvert==TRUE) {
+            return(convert(result_list$"set", result_list$"edo", edo))
+          } else {
+            return(result_list)
+          }
+    }
+  }
+  return(NA)
+}
