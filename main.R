@@ -3,6 +3,7 @@ tiny <- 1e-12
 globalrounder <- -log(tiny)/log(10)
 fortenums <- readRDS("fortenums.rds")
 ineqmats <- readRDS("ineqmats.rds")
+representative_signvectors <- readRDS("representative_signvectors.rds")
 
 fpunique <- function(x, MARGIN=0, rounder=globalrounder) {
   if (MARGIN == 0) {
@@ -717,4 +718,14 @@ quantize_color <- function(set,nmax=12,reconvert=FALSE,edo=globaledo,rounder=glo
     }
   }
   return(NA)
+}
+
+colornum <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder,
+                     signvector_list=representative_signvectors) {
+  if (evenness(set, edo) < 10^(-rounder) ) { return(0) }
+
+  card <- length(set)
+  signvec <- toString(signvector(set, ineqmat, edo, rounder))
+
+  return(which(signvector_list[[card]]==signvec))
 }
