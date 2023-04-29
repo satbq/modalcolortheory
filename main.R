@@ -4,6 +4,7 @@ globalrounder <- -log(tiny)/log(10)
 fortenums <- readRDS("fortenums.rds")
 ineqmats <- readRDS("ineqmats.rds")
 representative_signvectors <- readRDS("representative_signvectors.rds")
+representative_scales <- readRDS("representative_scales.rds")
 
 fpunique <- function(x, MARGIN=0, rounder=globalrounder) {
   if (MARGIN == 0) {
