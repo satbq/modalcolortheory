@@ -22,10 +22,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9bfe4c91-a0a2-4f28-b4bb-3b85d78e6d47" name="Changes" comment="created isgwf; fix sim so that it doesn't inadvertently change colors by sorting an 'out of order' set">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.R" beforeDir="false" afterPath="$PROJECT_DIR$/main.R" afterDir="false" />
-    </list>
+    <list default="true" id="9bfe4c91-a0a2-4f28-b4bb-3b85d78e6d47" name="Changes" comment="created isgwf; fix sim so that it doesn't inadvertently change colors by sorting an 'out of order' set" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -37,6 +34,9 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 6
+}]]></component>
   <component name="ProjectId" id="2JFcyf7QyrGRqrdONwlVewlcs3d" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
@@ -45,10 +45,17 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="settings.editor.selected.configurable" value="org.jetbrains.r.configuration.RSettingsProjectConfigurable" />
-  </component>
-  <component name="SpellCheckerSettings" BundledDictionaries="0" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" Dictionaries="0" CorrectionsLimit="5" DefaultDictionary="application-level" UseSingleDictionary="true" />
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/vorns/Documents/GitHub/modalcolortheory",
+    "settings.editor.selected.configurable": "org.jetbrains.r.configuration.RSettingsProjectConfigurable"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -94,7 +101,6 @@
         </entry>
       </map>
     </option>
-    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
@@ -102,11 +108,5 @@
     <MESSAGE value="makeineqmat2 -- a vectorized, much-faster, and more transparent version of makeineqmat." />
     <MESSAGE value="created isgwf; fix sim so that it doesn't inadvertently change colors by sorting an 'out of order' set" />
     <option name="LAST_COMMIT_MESSAGE" value="created isgwf; fix sim so that it doesn't inadvertently change colors by sorting an 'out of order' set" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="461" y="165" key="SettingsEditor" timestamp="1694231095552">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="461" y="165" key="SettingsEditor/0.0.1920.1040/-1600.0.1600.860@0.0.1920.1040" timestamp="1694231095552" />
   </component>
 </project>

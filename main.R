@@ -7,21 +7,21 @@ representative_signvectors <- readRDS("representative_signvectors.rds")
 representative_scales <- readRDS("representative_scales.rds")
 
 # Useful Scalar Constants. Note that these don't automatically update if you redefine globaledo.
-limma = globaledo * log(256/243)/log(2)
-just_st = globaledo * log(16/15)/log(2)
-apotome = globaledo * log(2187/2048)/log(2)
-just_wt = globaledo * log(9/8)/log(2)
-just_min3 = globaledo * log(6/5)/log(2)
-just_maj3 = globaledo * log(5/4)/log(2)
-just_p4 = globaledo * log(4/3)/log(2)
-just_p5 = globaledo * log(3/2)/log(2)
+limma <- globaledo * log(256/243)/log(2)
+just_st <- globaledo * log(16/15)/log(2)
+apotome <- globaledo * log(2187/2048)/log(2)
+just_wt <- globaledo * log(9/8)/log(2)
+just_min3 <- globaledo * log(6/5)/log(2)
+just_maj3 <- globaledo * log(5/4)/log(2)
+just_p4 <- globaledo * log(4/3)/log(2)
+just_p5 <- globaledo * log(3/2)/log(2)
 
-pyth_comma = (12 * just_fifth) %% globaledo
+pyth_comma = (12 * just_p5) %% globaledo
 pyth_maj3 = (4 * just_p5) %% globaledo
 syntonic_comma = pyth_maj3 - just_maj3
-meantone_fifth = function(frac=1/4) just_fifth - (syntonic_comma * frac)
+meantone_fifth = function(frac=1/4) just_p5 - (syntonic_comma * frac)
 
-carlos_step = function(name="alpha", weights=NULL, edo=globaledo) {
+carlos_step <- function(name="alpha", weights=NULL, edo=globaledo) {
   if (is.null(weights)) {
     if (name == "alpha") { weights = c(9, 5, 4) }
     if (name == "beta") { weights = c(11, 6, 5) }
@@ -29,7 +29,7 @@ carlos_step = function(name="alpha", weights=NULL, edo=globaledo) {
     if (name == "delta") { weights = c(50, 28, 23) }
   }
 
-  target_intervals = c(just_fifth, just_maj3, just_min3) / edo
+  target_intervals = c(just_p5, just_maj3, just_min3) / edo
 
   return(as.numeric((edo/sum(weights^2)) * weights %*% target_intervals))
 }
