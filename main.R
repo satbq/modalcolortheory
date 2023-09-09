@@ -21,6 +21,19 @@ pyth_maj3 = (4 * just_p5) %% globaledo
 syntonic_comma = pyth_maj3 - just_maj3
 meantone_fifth = function(frac=1/4) just_fifth - (syntonic_comma * frac)
 
+carlos_step = function(name="alpha", weights=NULL, edo=globaledo) {
+  if (is.null(weights)) {
+    if (name == "alpha") { weights = c(9, 5, 4) }
+    if (name == "beta") { weights = c(11, 6, 5) }
+    if (name == "gamma") { weights = c(20, 11, 9) }
+    if (name == "delta") { weights = c(50, 28, 23) }
+  }
+
+  target_intervals = c(just_fifth, just_maj3, just_min3) / edo
+
+  return(as.numeric((edo/sum(weights^2)) * weights %*% target_intervals))
+}
+
 
 # Main Functions
 
