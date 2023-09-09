@@ -335,32 +335,6 @@ isym <- function(set, edo=globaledo, rounder=globalrounder) {
   return(FALSE)
 }
 
-
-makesubmatold <- function(card) {
-  submat <- matrix("",card,card)
-
-  for (i in 0:(card-1)) {
-    submat[(i+1),] <- rep(paste0("-",i),card)
-  }
-
-  for (i in 1:card) {
-    prefixes <- 0:(card-1)
-    prefixes <- rotate(prefixes,(i-1))
-
-    for (j in 1:card) {
-      submat[i,j] <- paste0(prefixes[j], submat[i,j])
-    }
-  }
-
-  for (i in 1:card) {
-    for (j in 1:card) {
-      if ((i+j)>(card+1)) { submat[i,j] <- paste0("w+", submat[i,j])}
-    }
-  }
-  return(submat)
-}
-
-#MUCH faster than the original loop-based version
 makesubmat <- function(card) {
   submat <- t(outer(0:(card-1), 0:(card-1), paste, sep="-"))
 
@@ -372,85 +346,6 @@ makesubmat <- function(card) {
   submat <- submat[,card:1]
 
   return(submat)
-}
-
-makeineqmatold <- function(card) {
-  # This is fairly slow. Not intended for repeated use: look up precalculated results with getineqmat!
-  ineqmat <- rep(0,(card+1))
-  ineqmat <- rbind(ineqmat,ineqmat)
-  submat <- t(makesubmat(card))
-
-  for (i in 2:card) {
-    for (j in 1:(card-1)) {
-      posvec <- submat[i,j]
-
-      for (z in (j+1):card) {
-        negvec <- submat[i,z]
-        newline <- rep(0,(card+1))
-        wtest <- 1
-
-        if (substr(posvec,1,1)=="w") {
-          wtest <- wtest*(-1)
-          q <- nchar(posvec)
-          posvec <- substr(posvec,3,q)
-        }
-
-        if (substr(negvec,1,1)=="w") {
-          wtest <- wtest*(-1)
-          q2 <- nchar(negvec)
-          negvec <- substr(negvec,3,q2)
-        }
-
-        q <- nchar(posvec)
-        q2 <- nchar(negvec)
-
-        if (wtest == (-1)) { newline[card+1] <- -1 }
-
-        substrRight <- function(x, n){
-          # This function is by user Andrie on Stack Overflow: https://stackoverflow.com/a/7963963
-          substr(x, nchar(x)-n+1, nchar(x))
-        }
-
-        q3 <- as.integer(gregexpr(pattern="-",posvec)[[1]])
-        q4 <- as.integer(gregexpr(pattern="-",negvec)[[1]])
-        posvec1 <- as.numeric(substr(posvec,1,(q3-1))) + 1
-        posvec2 <- as.numeric(substrRight(posvec,(q-q3))) + 1
-        negvec1 <- as.numeric(substr(negvec,1,(q4-1))) + 1
-        negvec2 <- as.numeric(substrRight(negvec,(q2-q4))) + 1
-
-        newline[posvec1] <- newline[posvec1] + 1
-        newline[negvec2] <- newline[negvec2] + 1
-        newline[posvec2] <- newline[posvec2] - 1
-        newline[negvec1] <- newline[negvec1] - 1
-
-        negline <- newline
-        negline[1:card] <- -1 * negline[1:card]
-
-        newtest <- TRUE
-
-        temp <- rbind(ineqmat[,1:card],newline[1:card])
-        counter <- dim(temp)[1]
-        temp2 <- unique(temp,MARGIN=1)
-        counter2 <- dim(temp2)[1]
-
-        if (counter != (counter2+1)) { newtest <- FALSE }
-
-        temp <- rbind(ineqmat[,1:card],negline[1:card])
-        counter <- dim(temp)[1]
-        temp2 <- unique(temp,MARGIN=1)
-        counter2 <- dim(temp2)[1]
-        if (counter != (counter2+1)) { newtest <- FALSE }
-
-        if ( newtest == TRUE ) { ineqmat <- rbind(ineqmat,newline) }
-
-      }
-
-    }
-  }
-
-  ineqmat <- ineqmat[-(1:2),]
-  row.names(ineqmat) <- NULL
-  return(ineqmat)
 }
 
 makeineqmat <- function(card) {
