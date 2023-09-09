@@ -6,6 +6,24 @@ ineqmats <- readRDS("ineqmats.rds")
 representative_signvectors <- readRDS("representative_signvectors.rds")
 representative_scales <- readRDS("representative_scales.rds")
 
+# Useful Scalar Constants. Note that these don't automatically update if you redefine globaledo.
+limma = globaledo * log(256/243)/log(2)
+just_st = globaledo * log(16/15)/log(2)
+apotome = globaledo * log(2187/2048)/log(2)
+just_wt = globaledo * log(9/8)/log(2)
+just_min3 = globaledo * log(6/5)/log(2)
+just_maj3 = globaledo * log(5/4)/log(2)
+just_p4 = globaledo * log(4/3)/log(2)
+just_p5 = globaledo * log(3/2)/log(2)
+
+pyth_comma = (12 * just_fifth) %% globaledo
+pyth_maj3 = (4 * just_p5) %% globaledo
+syntonic_comma = pyth_maj3 - just_maj3
+meantone_fifth = function(frac=1/4) just_fifth - (syntonic_comma * frac)
+
+
+# Main Functions
+
 fpunique <- function(x, MARGIN=0, rounder=globalrounder) {
   if (MARGIN == 0) {
     return(x[!duplicated(round(x, rounder))])
@@ -625,6 +643,9 @@ colornum <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder,
 
   return(which(signvector_list[[card]]==signvec))
 }
+
+
+# Scala-Related Functions
 
 writeSCL <- function(x, filename, period=2, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
   # Period defined as a frequency ratio (i.e. 2 for octave-repeading scales)
