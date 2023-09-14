@@ -1,10 +1,20 @@
 globaledo <- 12
 tiny <- 1e-10
 globalrounder <- -log(tiny)/log(10)
+
+# Necessary RDS files for reference. These should be downloaded from GitHub to your working directory for R.
 fortenums <- readRDS("fortenums.rds")
 ineqmats <- readRDS("ineqmats.rds")
 representative_signvectors <- readRDS("representative_signvectors.rds")
 representative_scales <- readRDS("representative_scales.rds")
+
+# The following large file (130 MB) contains adjacency lists (indexed by colornum) for color adjacency graphs.
+# It is too large to host directly on GitHub, so it can be downloaded from the following Google Drive link:
+# https://drive.google.com/file/d/1ektff4Hoyg43tB6PewfLNDQyPbWPi6Fi/view?usp=sharing
+# Save in your working directory alongside fortenums.rds, etc.
+if (file.exists("color_adjacencies.rds")) {
+  color_adjacencies <- readRDS("color_adjacencies.rds")
+}
 
 # Useful Scalar Constants. Note that these don't automatically update if you redefine globaledo.
 limma <- globaledo * log(256/243)/log(2)

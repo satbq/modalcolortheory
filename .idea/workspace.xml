@@ -23,8 +23,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9bfe4c91-a0a2-4f28-b4bb-3b85d78e6d47" name="Changes" comment="created isgwf; fix sim so that it doesn't inadvertently change colors by sorting an 'out of order' set">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.R" beforeDir="false" afterPath="$PROJECT_DIR$/main.R" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,5 +108,9 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="461" y="165" key="SettingsEditor/0.0.1920.1040/-1600.0.1600.860@0.0.1920.1040" timestamp="1694285576443" />
+    <state x="-1137" y="180" width="672" height="678" key="search.everywhere.popup" timestamp="1694430229560">
+      <screen x="-1600" y="0" width="1600" height="860" />
+    </state>
+    <state x="-1137" y="180" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040/-1600.0.1600.860@-1600.0.1600.860" timestamp="1694430229560" />
   </component>
 </project>
