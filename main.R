@@ -134,6 +134,7 @@ ratio <- function(set, edo=globaledo, rounder=globalrounder) {
   return(delta(set, edo, rounder)/eps(set, edo, rounder))
 }
 
+# Basic Fortean Set-Theory Functions
 sc <- function(card,num) {
   set <- fortenums[[card]][num]
   res <- strtoi(unlist(strsplit(set,split=",")))
@@ -276,6 +277,7 @@ ivec <- function(set, edo=globaledo) {
   return(vec)
 }
 
+# Core Modal Color Theory Functions
 # "equal division of the octave origin"
 edoo <- function(card, edo=globaledo) {
   return( (0:(card-1))*(edo/card) )
@@ -445,11 +447,7 @@ if (FALSE) {
   ineqmats <- list()
   ineqmats[[1]] <- integer(0)
   for (i in 2:53) {
-    time1 <- Sys.time()
     ineqmats[[i]] <- makeineqmat(i)
-    time2 <- Sys.time()
-    print(i)
-    print(time2-time1)
   }
   saveRDS(ineqmats, "ineqmats.rds")
 }
