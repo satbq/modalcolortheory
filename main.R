@@ -39,19 +39,19 @@ meantone_fifth <- function(frac=1/4) just_p5 - (syntonic_comma * frac)
 
 carlos_step <- function(name="alpha", weights=NULL, edo=globaledo) {
   if (is.null(weights)) {
-    if (name == "alpha") { weights = c(9, 5, 4) }
-    if (name == "beta") { weights = c(11, 6, 5) }
-    if (name == "gamma") { weights = c(20, 11, 9) }
-    if (name == "delta") { weights = c(50, 28, 23) }
+    if (name == "alpha") { weights <- c(9, 5, 4) }
+    if (name == "beta") { weights <- c(11, 6, 5) }
+    if (name == "gamma") { weights <- c(20, 11, 9) }
+    if (name == "delta") { weights <- c(50, 28, 23) }
   }
 
-  target_intervals = c(just_p5, just_maj3, just_min3) / edo
+  target_intervals <- c(just_p5, just_maj3, just_min3) / edo
 
   return(as.numeric((edo/sum(weights^2)) * weights %*% target_intervals))
 }
 
 
-# Main Functions
+# Basic Functions
 
 fpunique <- function(x, MARGIN=0, rounder=globalrounder) {
   if (MARGIN == 0) {
@@ -83,13 +83,20 @@ tni <- function(set, n, edo=globaledo, sorted=TRUE) {
 
 startzero <- function(set, edo=globaledo, sorted=TRUE) tn(set, -set[1], edo, sorted)
 
-rotate <- function(x, n=1) {
+rotate <- function(x, n=1, transpose_up=FALSE, edo=globaledo) {
   len <- length(x)
   n <- n %% length(x)
-  return( c( tail(x,len-n), head(x,n) ))
+
+  if (transpose_up==TRUE && n != 0) {
+    x[1:n] <- x[1:n] + edo
+  }
+
+  res <- c( tail(x,len-n), head(x,n) )
+
+  return(res)
 }
 
-rotatewrap <- function(n,x) rotate(x,n)
+rotatewrap <- function(n,x,transpose_up,edo) rotate(x,n,transpose_up,edo)
 
 modecompare <- function(set, ref, rounder=globalrounder) sum(unique(sign(round(set - ref, rounder))))
 # Using voice-leading brightness, modecompare returns 1 if set is brighter than ref(erence),
@@ -97,8 +104,10 @@ modecompare <- function(set, ref, rounder=globalrounder) sum(unique(sign(round(s
 
 # sim = scalar interval matrix
 sim <- function(set, edo=globaledo) {
-  res <- sapply(0:(length(set)-1), rotatewrap, x=set)
-  res <- apply(res, 2, startzero, edo, sorted=FALSE)
+  transpose_down <- function(set) set - set[1]
+
+  res <- sapply(0:(length(set)-1), rotatewrap, x=set, transpose_up=TRUE,edo=edo)
+  res <- apply(res, 2, transpose_down)
   return(res)
 }
 
@@ -134,7 +143,7 @@ ratio <- function(set, edo=globaledo, rounder=globalrounder) {
   return(delta(set, edo, rounder)/eps(set, edo, rounder))
 }
 
-# Basic Fortean Set-Theory Functions
+# Fortean Set-Theory Functions
 sc <- function(card,num) {
   set <- fortenums[[card]][num]
   res <- strtoi(unlist(strsplit(set,split=",")))
