@@ -143,6 +143,58 @@ ratio <- function(set, edo=globaledo, rounder=globalrounder) {
   return(delta(set, edo, rounder)/eps(set, edo, rounder))
 }
 
+
+brightnessgraph <- function(set, numdigits=2, edo=globaledo, rounder=globalrounder) {
+  library(igraph)
+
+  card <- length(set)
+  sums <- colSums(sim(set,edo))
+
+  comparisons <- -1*brightnessComps(set, edo, rounder)
+  comparisons[which(comparisons<0)] <- 0
+
+  # This section, up through the definition of "reduced comparisons," is a hack-y way to approximate the
+  # transitive reduction of the graph of all brightness comparisons. It works by using the idea that two comparable
+  # modes are less likely to have an intermediate node if their sums are pretty close to each other. I'm not
+  # confident the behavior will always be ideal, but any mistakes should involve drawing redundant arrows (e.g.
+  # from phrygian directly to ionian), never removing arrows that are essential.
+  diffs <- outer(sums,sums,'-')
+  diffs <- abs(comparisons * diffs)
+  min_diff <- min(diffs[diffs>10^(-rounder)])
+  diffs <- diffs/min_diff
+  diffs_nonzero <- !!diffs
+  diffs <- 3^(diffs-1)
+  diffs <- diffs_nonzero * diffs
+  weighted_graph <- graph_from_adjacency_matrix(diffs,weighted=TRUE)
+
+  get_neighbors <- function(i) {
+    suppressWarnings(path_lengths <- unlist(lapply(shortest_paths(weighted_graph, i, mode="out")[[1]],length)))
+    return(which(path_lengths==2))
+  }
+
+  reduced_comparisons <- matrix(0, nrow=card, ncol=card)
+  for (i in 1:card) {
+    reduced_comparisons[i, get_neighbors(i)] <- 1
+  }
+
+  # Below determines labels and visual layout for the brightness graph
+  # Right now the horizontal placement of the modes simply arranges them from left to right in rotational order
+  # (i.e., mode I farthest to the left, last mode farther to the right). This often doesn't visualize the inherent
+  # structure in the best possible way, and can make arrows overlap to the point of illegibility. Until a smarter
+  # algorithm is found, it can improve the legibility of the graph to choose a different mode as I, e.g. to call
+  # brightnessgraph(sim(scale)[,4]) instead of brightnessgraph(scale).
+  layout_matrix <- cbind(1:card,sums)
+  label_matrix <- cbind(as.character(as.roman(1:card)),
+                        rep(" (",card),
+                        round(sums,digits=numdigits),
+                        rep(")\n",card),
+                        apply(apply(sim(set,edo=edo),2,round,digits=numdigits),2,paste,collapse=", "))
+  label_vector <- apply(label_matrix,1,paste,collapse="")
+
+  bg <- graph_from_adjacency_matrix(reduced_comparisons)
+  plot(bg,layout=layout_matrix, vertex.shape="none", vertex.label=label_vector)
+}
+
 # Fortean Set-Theory Functions
 sc <- function(card,num) {
   set <- fortenums[[card]][num]
