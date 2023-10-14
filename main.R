@@ -96,7 +96,7 @@ rotate <- function(x, n=1, transpose_up=FALSE, edo=globaledo) {
   return(res)
 }
 
-rotatewrap <- function(n,x,transpose_up,edo) rotate(x,n,transpose_up,edo)
+rotatewrap <- function(n,x,transpose_up=FALSE,edo=globaledo) rotate(x,n,transpose_up,edo)
 
 modecompare <- function(set, ref, rounder=globalrounder) sum(unique(sign(round(set - ref, rounder))))
 # Using voice-leading brightness, modecompare returns 1 if set is brighter than ref(erence),
@@ -143,12 +143,12 @@ ratio <- function(set, edo=globaledo, rounder=globalrounder) {
   return(delta(set, edo, rounder)/eps(set, edo, rounder))
 }
 
-
-brightnessgraph <- function(set, numdigits=2, edo=globaledo, rounder=globalrounder) {
+brightnessgraph <- function(set, numdigits=2, show_sums=TRUE, show_pitches=TRUE, edo=globaledo, rounder=globalrounder) {
   library(igraph)
 
   card <- length(set)
   sums <- colSums(sim(set,edo))
+  y_coords <- sums
 
   comparisons <- -1*brightnessComps(set, edo, rounder)
   comparisons[which(comparisons<0)] <- 0
@@ -158,17 +158,17 @@ brightnessgraph <- function(set, numdigits=2, edo=globaledo, rounder=globalround
   # modes are less likely to have an intermediate node if their sums are pretty close to each other. I'm not
   # confident the behavior will always be ideal, but any mistakes should involve drawing redundant arrows (e.g.
   # from phrygian directly to ionian), never removing arrows that are essential.
-  diffs <- outer(sums,sums,'-')
+  diffs <- outer(sums, sums,'-')
   diffs <- abs(comparisons * diffs)
   min_diff <- min(diffs[diffs>10^(-rounder)])
   diffs <- diffs/min_diff
   diffs_nonzero <- !!diffs
   diffs <- 3^(diffs-1)
   diffs <- diffs_nonzero * diffs
-  weighted_graph <- graph_from_adjacency_matrix(diffs,weighted=TRUE)
+  weighted_graph <- graph_from_adjacency_matrix(diffs, weighted=TRUE)
 
   get_neighbors <- function(i) {
-    suppressWarnings(path_lengths <- unlist(lapply(shortest_paths(weighted_graph, i, mode="out")[[1]],length)))
+    suppressWarnings(path_lengths <- unlist(lapply(shortest_paths(weighted_graph, i, mode="out")[[1]], length)))
     return(which(path_lengths==2))
   }
 
@@ -177,18 +177,62 @@ brightnessgraph <- function(set, numdigits=2, edo=globaledo, rounder=globalround
     reduced_comparisons[i, get_neighbors(i)] <- 1
   }
 
-  # Below determines labels and visual layout for the brightness graph
-  # Right now the horizontal placement of the modes simply arranges them from left to right in rotational order
-  # (i.e., mode I farthest to the left, last mode farther to the right). This often doesn't visualize the inherent
-  # structure in the best possible way, and can make arrows overlap to the point of illegibility. Until a smarter
-  # algorithm is found, it can improve the legibility of the graph to choose a different mode as I, e.g. to call
-  # brightnessgraph(sim(scale)[,4]) instead of brightnessgraph(scale).
-  layout_matrix <- cbind(1:card,sums)
+  # Below determines labels and visual layout for the brightness graph.
+
+  middle <- round(card/2)
+  if (card%%2) {
+    pillars <- rbind(order(sums)[1:middle], order(sums)[card:middle])
+  } else {
+    pillars <- rbind(order(sums)[1:middle], order(sums)[card:(middle+1)])
+
+    if (sums[pillars[2,middle]]-sums[pillars[1, middle]] < 10^(-rounder)) {
+      # This conditional checks for the most common type of overlap, which happens when two modes share the median
+      # sum brightness for scales of even cardinality.
+      # In principle this could be fixed by the while loop (using "bad_rows") below but I like the appearance that this
+      # produces better, when this is the only type of overlap in the graph.
+      tempvals <- c(pillars[2, 1], pillars[2, middle])
+      pillars[2, middle] <- tempvals[1]
+      pillars[2, 1] <- tempvals[2]
+    }
+  }
+  pick_pillar <- function(n) {
+    height <- n
+    res <- which(pillars==height, arr.ind=TRUE)[1, 2]
+    return(res)
+  }
+  x_coords <- sapply(1:card, pick_pillar)
+  x_offsets <- (x_coords %% 2) - .5
+  x_coords <- x_coords * x_offsets
+
+  # In some cases, e.g. set class 6-30, more than 2 modes have the same sum brightness.
+  # This will offset the x_coord of overlapping nodes.
+  rounded_coordinates <- round(cbind(x_coords, y_coords), rounder)
+  bad_rows <- duplicated(rounded_coordinates, MARGIN=1)
+  layout_matrix <- cbind(x_coords, y_coords)
+  while(sum(bad_rows)) {
+    layout_matrix[bad_rows, 1] <- max(layout_matrix[,1]) + 1
+    new_rounded_coordinates <- round(layout_matrix, rounder)
+    bad_rows <- duplicated(new_rounded_coordinates, MARGIN=1)
+  }
+
   label_matrix <- cbind(as.character(as.roman(1:card)),
                         rep(" (",card),
                         round(sums,digits=numdigits),
-                        rep(")\n",card),
+                        rep(")",card),
+                        rep("\n",card),
                         apply(apply(sim(set,edo=edo),2,round,digits=numdigits),2,paste,collapse=", "))
+  pitches_start_index <- 5
+  pitches_end_index <- 6
+  sums_start_index <- 2
+  sums_end_index <- 4
+  if (show_pitches==FALSE) {
+    label_matrix <- label_matrix[,-(pitches_start_index:pitches_end_index)]
+  }
+  if (show_sums==FALSE) {
+    label_matrix <- label_matrix[,-(sums_start_index:sums_end_index)]
+  }
+  if (class(label_matrix)=="character") label_matrix <- as.matrix(label_matrix)
+
   label_vector <- apply(label_matrix,1,paste,collapse="")
 
   bg <- graph_from_adjacency_matrix(reduced_comparisons)
@@ -757,9 +801,11 @@ writeSCL <- function(x, filename, period=2, ineqmat=NULL, edo=globaledo, rounder
 
   nameColor <- FALSE
   if (exists(deparse(substitute(representative_signvectors)))) {
-    color <- colornum(x,ineqmat=ineqmat, edo=edo, rounder=rounder,
-                     signvector_list=representative_signvectors)
-    nameColor <- TRUE
+    if (card <= length(representative_signvectors)) {
+      color <- colornum(x,ineqmat=ineqmat, edo=edo, rounder=rounder,
+                       signvector_list=representative_signvectors)
+      nameColor <- TRUE
+    }
   }
 
 
