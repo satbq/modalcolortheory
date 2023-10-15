@@ -179,7 +179,7 @@ brightnessgraph <- function(set, numdigits=2, show_sums=TRUE, show_pitches=TRUE,
 
   # Below determines labels and visual layout for the brightness graph.
 
-  middle <- round(card/2)
+  middle <- ceiling(card/2)
   if (card%%2) {
     pillars <- rbind(order(sums)[1:middle], order(sums)[card:middle])
   } else {
