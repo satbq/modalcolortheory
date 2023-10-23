@@ -231,7 +231,8 @@ brightnessgraph <- function(set, numdigits=2, show_sums=TRUE, show_pitches=TRUE,
   if (show_sums==FALSE) {
     label_matrix <- label_matrix[,-(sums_start_index:sums_end_index)]
   }
-  if (class(label_matrix)=="character") label_matrix <- as.matrix(label_matrix)
+
+  if (class(label_matrix)[1]=="character") label_matrix <- as.matrix(label_matrix)
 
   label_vector <- apply(label_matrix,1,paste,collapse="")
 
