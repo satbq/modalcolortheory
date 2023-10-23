@@ -383,6 +383,68 @@ ivec <- function(set, edo=globaledo) {
   return(vec)
 }
 
+# Voice Leading Functions
+
+signed_interval_class <- function(x, edo=globaledo) {
+  y <- x %% edo
+  if (y > (edo/2)) { return(y-edo) }
+  return(y)
+}
+
+minimizeVL <- function(goal, source, method="taxicab", no_ties=FALSE, edo=globaledo) {
+  card <- length(goal)
+  goal <- goal[order(source)] # Presumes P-equivalence; otherwise not much point
+  if (card != length(source)) { return(rep(NA, card)) }
+
+  modes <- sapply(0:(card-1), rotatewrap, x=goal, edo=globaledo)
+  voice_leadings <- t(t(modes)-source)
+  voice_leadings[] <- sapply(voice_leadings, signed_interval_class, edo=edo)
+  if (method == "taxicab") {
+    vl_scores <- colSums(apply(voice_leadings, 1, abs))
+  }
+  if (method == "euclidean") {
+    vl_scores <- sqrt(rowSums(voice_leadings^2))
+  }
+  index <- which(vl_scores == min(vl_scores))
+
+  if (no_ties) { index <- index[1] }
+
+  return(voice_leadings[index,])
+}
+
+VL_rolodex <- function(source, goal_type=NULL, reorder=TRUE, method="taxicab", edo=globaledo, no_ties=FALSE) {
+  if (is.null(goal_type)) { goal_type <- source }
+  tnwrap <- function(n, set, edo) tn(set, n, edo=edo)
+  goals <- sapply(1:edo, tnwrap, set=goal_type, edo=edo)
+
+  res <- apply(goals, 2, minimizeVL, source=source, method=method, edo=edo, no_ties=no_ties)
+  if (class(res) == "matrix") { res <- as.list(as.data.frame(res)) }
+  names(res) <- 1:edo
+  names(res)[edo] <- 0
+
+  if (method=="taxicab") {
+    dist_func <- function(x) sum(abs(x))
+  }
+  if (method=="euclidean") {
+    dist_func <- function(x) sqrt(sum(x^2))
+  }
+
+  if (reorder == TRUE) {
+    index <- rep(NA,edo)
+    for (i in 1:edo) {
+      if (class(res[[i]]) == "matrix") {
+        index[i] <- apply(res[[i]], 1, dist_func)[1]
+      } else {
+        index[i] <- dist_func(res[[i]])
+      }
+    }
+    res <- res[order(index)]
+  }
+
+  return(res)
+}
+
+
 # Core Modal Color Theory Functions
 # "equal division of the octave origin"
 edoo <- function(card, edo=globaledo) {
