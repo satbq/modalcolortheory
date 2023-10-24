@@ -418,7 +418,7 @@ VL_rolodex <- function(source, goal_type=NULL, reorder=TRUE, method="taxicab", e
   goals <- sapply(1:edo, tnwrap, set=goal_type, edo=edo)
 
   res <- apply(goals, 2, minimizeVL, source=source, method=method, edo=edo, no_ties=no_ties)
-  if (class(res) == "matrix") { res <- as.list(as.data.frame(res)) }
+  if (class(res)[1] == "matrix") { res <- as.list(as.data.frame(res)) }
   names(res) <- 1:edo
   names(res)[edo] <- 0
 
@@ -432,7 +432,7 @@ VL_rolodex <- function(source, goal_type=NULL, reorder=TRUE, method="taxicab", e
   if (reorder == TRUE) {
     index <- rep(NA,edo)
     for (i in 1:edo) {
-      if (class(res[[i]]) == "matrix") {
+      if (class(res[[i]])[1] == "matrix") {
         index[i] <- apply(res[[i]], 1, dist_func)[1]
       } else {
         index[i] <- dist_func(res[[i]])
@@ -922,7 +922,7 @@ readSCL <- function(filename, scaleonly=TRUE, edo=globaledo) {
 
   #Read scale length & remove description header
   card <- strtoi(contents[2])
-  if (class(card) != "integer") { warning(".scl file not formatted as expected. Scale length not found.") }
+  if (class(card)[1] != "integer") { warning(".scl file not formatted as expected. Scale length not found.") }
   contents <- contents[-(1:2)]
 
   #Locate the degrees defined as ratios vs. those defined by cents
