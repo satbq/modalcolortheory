@@ -69,6 +69,24 @@ fpunique <- function(x, MARGIN=0, rounder=globalrounder) {
 
 convert <- function(x, edo1, edo2) x*(edo2/edo1)
 
+coord_to_edo <- function(set, edo=globaledo) {
+  # Change coordinate system to one that treats equal division of the octave as the origin,
+  # e.g. representing (0, 4, 7, 8) as (0, 1, 1, -1). The results simplify some calculations related to the hyperplane
+  # arrangements, but shouldn't be assumed compatible with most functions, which presume the standard coordinate system
+  # of music theory.
+  card <- length(set)
+  new_origin <- edoo(card, edo=edo)
+  return(set-new_origin)
+}
+
+coord_from_edo <- function(set, edo=globaledo) {
+  # Change coordinate system away from equal division of the octave as origin to the multiset (C, C, ..., C) as origin,
+  # e.g. from (0, 0, -1) to (0, 4, 7).
+  card <- length(set)
+  new_origin <- edoo(card, edo=edo)
+  return(set+new_origin)
+}
+
 tn <- function(set, n, edo=globaledo, sorted=TRUE) {
   res <- ((set%%edo) + (n%%edo)) %% edo
   if (sorted == FALSE) { return(res) }
@@ -727,6 +745,19 @@ asword <- function(set, edo=globaledo, rounder=globalrounder) {
 
   for (i in 1:card) {
     result[which(abs(setsteps - stepvals[i]) < 10^(-1*rounder) )] <- i
+  }
+
+  check_for_rounding_error <- isTRUE(all.equal(sort(unique(result)), 1:max(result)))
+
+  if (!check_for_rounding_error) {
+    old_letters <- unique(result)
+    reduce_letter <- function(n, word) sum(word <= n)
+    reduced_letters <- sapply(old_letters, reduce_letter, word=old_letters)
+    new_result <- result
+    for (i in 1:length(old_letters)) {
+      new_result[which(result==old_letters[i])] <- reduced_letters[i]
+    }
+    result <- new_result
   }
 
   return(result)
