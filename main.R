@@ -289,6 +289,19 @@ primeform <- function(set, edo=globaledo) {
   return(winner)
 }
 
+# Maybe rename to is_inversionally_symmetric or has_i_sym?
+isym <- function(set, edo=globaledo, rounder=globalrounder) {
+  card <- length(set)
+  setword <- asword(set, edo, rounder)
+  invsetword <- rev(setword)
+
+  for (i in 1:card) {
+    invmode <- rotate(invsetword,i)
+    if ( isTRUE(all.equal(setword,invmode)) ) { return(TRUE) }
+  }
+  return(FALSE)
+}
+
 charm <- function(set, edo=globaledo) {
   return(tnprime(tni(set, 0, edo), edo))
 }
@@ -384,7 +397,6 @@ ivec <- function(set, edo=globaledo) {
 }
 
 # Voice Leading Functions
-
 signed_interval_class <- function(x, edo=globaledo) {
   y <- x %% edo
   if (y > (edo/2)) { return(y-edo) }
@@ -444,53 +456,7 @@ VL_rolodex <- function(source, goal_type=NULL, reorder=TRUE, method="taxicab", e
   return(res)
 }
 
-
-# Core Modal Color Theory Functions
-# "equal division of the octave origin"
-edoo <- function(card, edo=globaledo) {
-  return( (0:(card-1))*(edo/card) )
-}
-
-# "maximally even MOS"
-makeMEMOS <- function(card, edo=globaledo, floor=TRUE) {
-  if (floor==TRUE) {
-    res <- primeform(floor(edoo(card, edo)), edo)
-  } else {
-    res <- primeform(round(edoo(card, edo), digits=0), edo)
-  }
-
-  return(res)
-}
-
-evenness <- function(set, edo=globaledo) {
-  card <- length(set)
-  edoozero <- edoo(card, edo) - (sum(edoo(card, edo))/card)
-  setzero <- set - (sum(set)/card)
-  return(sqrt(sum((setzero-edoozero)^2)))
-}
-
-saturate <- function(r, set, edo=globaledo) {
-  card <- length(set)
-  origin <- edoo(card, edo)
-  vec <- origin + r*(set-origin)
-
-  return(vec)
-}
-
-asword <- function(set, edo=globaledo, rounder=globalrounder) {
-  card <- length(set)
-  result <- rep(0,card)
-
-  setsteps <- sim(set, edo)[2, ]
-  stepvals <- sort(fpunique(setsteps, 0, rounder))
-
-  for (i in 1:card) {
-    result[which(abs(setsteps - stepvals[i]) < 10^(-1*rounder) )] <- i
-  }
-
-  return(result)
-}
-
+# Subset Functions
 intervalspectrum <- function(set, edo=globaledo, rounder=globalrounder) {
   modes <- sim(set, edo)
   uniques <- apply(modes,1,fpunique, rounder=rounder)
@@ -540,16 +506,37 @@ subsetspectrum <- function(set,subsetcard,simplify=TRUE,mode="tn",edo=globaledo,
   return(res)
 }
 
-isym <- function(set, edo=globaledo, rounder=globalrounder) {
-  card <- length(set)
-  setword <- asword(set, edo, rounder)
-  invsetword <- rev(setword)
+# Core Modal Color Theory Functions
 
-  for (i in 1:card) {
-    invmode <- rotate(invsetword,i)
-    if ( isTRUE(all.equal(setword,invmode)) ) { return(TRUE) }
+# "equal division of the octave origin"
+edoo <- function(card, edo=globaledo) {
+  return( (0:(card-1))*(edo/card) )
+}
+
+# "maximally even MOS"
+makeMEMOS <- function(card, edo=globaledo, floor=TRUE) {
+  if (floor==TRUE) {
+    res <- primeform(floor(edoo(card, edo)), edo)
+  } else {
+    res <- primeform(round(edoo(card, edo), digits=0), edo)
   }
-  return(FALSE)
+
+  return(res)
+}
+
+evenness <- function(set, edo=globaledo) {
+  card <- length(set)
+  edoozero <- edoo(card, edo) - (sum(edoo(card, edo))/card)
+  setzero <- set - (sum(set)/card)
+  return(sqrt(sum((setzero-edoozero)^2)))
+}
+
+saturate <- function(r, set, edo=globaledo) {
+  card <- length(set)
+  origin <- edoo(card, edo)
+  vec <- origin + r*(set-origin)
+
+  return(vec)
 }
 
 makesubmat <- function(card) {
@@ -665,6 +652,16 @@ howfree <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
   return(freedom)
 }
 
+colornum <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder,
+                     signvector_list=representative_signvectors) {
+  if (evenness(set, edo) < 10^(-rounder) ) { return(0) }
+
+  card <- length(set)
+  signvec <- toString(signvector(set, ineqmat, edo, rounder))
+
+  return(which(signvector_list[[card]]==signvec))
+}
+
 # Checks relationship between two signvecs. If identical returns 0; if adjacent regions, returns 1; otherwise returns -1.
 comparesignvecs <- function(signvecX, signvecY) {
   # Are the signvecs identical?
@@ -719,6 +716,22 @@ comparesignvecs <- function(signvecX, signvecY) {
   return(res)
 }
 
+
+# Word-Theoretic Functions
+asword <- function(set, edo=globaledo, rounder=globalrounder) {
+  card <- length(set)
+  result <- rep(0,card)
+
+  setsteps <- sim(set, edo)[2, ]
+  stepvals <- sort(fpunique(setsteps, 0, rounder))
+
+  for (i in 1:card) {
+    result[which(abs(setsteps - stepvals[i]) < 10^(-1*rounder) )] <- i
+  }
+
+  return(result)
+}
+
 realize_setword <- function(setword, edo=globaledo) {
   set <- cumsum(setword)
   wordedo <- set[length(set)]
@@ -770,17 +783,19 @@ isgwf <- function(set, setword=NULL,allowdegen=FALSE,edo=globaledo,rounder=globa
 
 OPTC_test <- function(set, edo=globaledo, rounder=globalrounder, single_answer=TRUE) {
   basically_zero <- 10^(-rounder)
-  step_sizes <- sim(set)[2,]
+  step_sizes <- sim(sort(set))[2,]
 
   satisfies_O <- max(set) < edo
   satisfies_P <- isTRUE( all.equal(set, sort(set), tolerance=basically_zero) )
   satisfies_T <- abs(set[1]) < basically_zero
-  satisfies_C <- min(step_sizes) > basically_zero
+  satisfies_C <- min(abs(step_sizes)) > basically_zero
 
   if (single_answer == FALSE) { return(c(satisfies_O, satisfies_P, satisfies_T, satisfies_C)) }
   return(satisfies_O && satisfies_P && satisfies_T && satisfies_C)
 }
 
+
+# Set Generation Functions
 quantize_color <- function(set, nmax=12, reconvert=FALSE, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
   card <- length(set)
   signvec <- signvector(set, ineqmat=ineqmat, edo=edo, rounder=rounder)
@@ -829,19 +844,30 @@ quantize_color <- function(set, nmax=12, reconvert=FALSE, ineqmat=NULL, edo=glob
   return(rep(NA,card))
 }
 
-colornum <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder,
-                     signvector_list=representative_signvectors) {
-  if (evenness(set, edo) < 10^(-rounder) ) { return(0) }
+random_sphere_points <- function(card, numpoints, distance=1) {
+  points <- replicate(numpoints, rnorm(card))
+  normalize <- function(vec) {
+    z <- sqrt(sum(vec^2))
+    return(vec * (distance/z))
+  }
 
+  return(apply(points,2,normalize))
+}
+
+surround_set <- function(set, magnitude=2, distance=1) {
   card <- length(set)
-  signvec <- toString(signvector(set, ineqmat, edo, rounder))
+  num_sets <- card * 10^magnitude
 
-  return(which(signvector_list[[card]]==signvec))
+  offsets <- random_sphere_points(card-1, num_sets, distance=distance)
+  leading_zeroes <- rep(0, num_sets)
+  res <- offsets + set[2:card]
+  res <- rbind(leading_zeroes, res)
+  rownames(res) <- NULL
+  return(res)
 }
 
 
 # Scala-Related Functions
-
 writeSCL <- function(x, filename, period=2, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
   # Period defined as a frequency ratio (i.e. 2 for octave-repeading scales)
   periodCents <- 1200 * log(period)/log(2)
@@ -898,8 +924,8 @@ writeSCL <- function(x, filename, period=2, ineqmat=NULL, edo=globaledo, rounder
 
 
 readSCL <- function(filename, scaleonly=TRUE, edo=globaledo) {
-#Note that if scala files aren't defined with enough precision, they may appear to lack structure.
-#Check how close they are to hyperplanes to adjust rounder and tiny appropriately.
+#Note that if scala files don't define the scale with enough precision, they may appear to lack structure.
+#Check how close they are to hyperplanes to adjust rounder appropriately.
   contents <- scan(filename,what="character",sep="\n",quiet=TRUE,blank.lines.skip=FALSE)
 
   removeAfterChar <- function(string,charToRemove) {
