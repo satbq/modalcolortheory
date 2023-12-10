@@ -781,19 +781,19 @@ OPTC_test <- function(set, edo=globaledo, rounder=globalrounder, single_answer=T
   return(satisfies_O && satisfies_P && satisfies_T && satisfies_C)
 }
 
-quantize_color <- function(set,nmax=12,reconvert=FALSE,edo=globaledo,rounder=globalrounder) {
+quantize_color <- function(set, nmax=12, reconvert=FALSE, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
   card <- length(set)
-  signvec <- signvector(set,edo=edo,rounder=rounder)
+  signvec <- signvector(set, ineqmat=ineqmat, edo=edo, rounder=rounder)
 
   word <- asword(set, edo, rounder)
-  letters <- sort(unique(word),decreasing=FALSE)
+  letters <- sort(unique(word), decreasing=FALSE)
 
   startedo <- sum(word)
 
   current_set <- cumsum(c(0,word))[1:card]
 
-  if (isTRUE(all.equal(signvector(current_set, edo, rounder), signvec))) {
-    result_list <- list(set=curset, edo=startedo)
+  if (isTRUE(all.equal(signvector(current_set, ineqmat=ineqmat, edo=edo, rounder=rounder), signvec))) {
+    result_list <- list(set=current_set, edo=startedo)
     if (reconvert==TRUE) {
       return(convert(result_list$"set", result_list$"edo", edo))
     } else {
@@ -815,7 +815,7 @@ quantize_color <- function(set,nmax=12,reconvert=FALSE,edo=globaledo,rounder=glo
     current_edo <- sum(res)
     current_set <- cumsum(c(0,res))[1:card]
 
-    current_signvec <- signvector(current_set, edo=current_edo, rounder=rounder)
+    current_signvec <- signvector(current_set, ineqmat=ineqmat, edo=current_edo, rounder=rounder)
 
     if (isTRUE(all.equal(current_signvec, signvec))) {
           result_list <- list(set=current_set, edo=current_edo)
@@ -826,7 +826,7 @@ quantize_color <- function(set,nmax=12,reconvert=FALSE,edo=globaledo,rounder=glo
           }
     }
   }
-  return(NA)
+  return(rep(NA,card))
 }
 
 colornum <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder,
