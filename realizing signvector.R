@@ -49,9 +49,14 @@ step_signvector <- function(set, edo=globaledo, rounder=globalrounder) {
 
 set_from_signvector <- function(signvec, card, nmax=12, reconvert=FALSE, ineqmat=NULL,
                                 edo=globaledo, rounder=globalrounder) {
-  if (is.null(ineqmat)) { ineqmat <- makeineqmat(card) }
-  set_from_word <- approximate_from_signvector(signvec[get_relevant_rows(1, ineqmat=ineqmat)],
-                                               ineqmat=ineqmat[get_relevant_rows(1, ineqmat=ineqmat),])
+  usual_ineqmat <- getineqmat(card)
+  if (is.null(ineqmat)) { ineqmat <- usual_ineqmat }
+
+  # Note that for this step we use the usual "Modal Color Theory" ineqmat, not any custom-input ineqmat,
+  # because using an ineqmat with extra rows may make it impossible for approximate_from_signvector to generate
+  # a scale with the right step-word.
+  set_from_word <- approximate_from_signvector(signvec[get_relevant_rows(1, ineqmat=usual_ineqmat)],
+                                               ineqmat=usual_ineqmat[get_relevant_rows(1, ineqmat=usual_ineqmat),])
   implied_word <- asword(set_from_word, edo=edo, rounder=rounder)
 
   # if (!isTRUE(all.equal(signvec[get_relevant_rows(1, ineqmat=ineqmat)],
