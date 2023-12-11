@@ -838,7 +838,7 @@ quantize_color <- function(set, nmax=12, reconvert=FALSE, ineqmat=NULL, edo=glob
 
   current_set <- cumsum(c(0,word))[1:card]
 
-  if (isTRUE(all.equal(signvector(current_set, ineqmat=ineqmat, edo=edo, rounder=rounder), signvec))) {
+  if (isTRUE(all.equal(signvector(current_set, ineqmat=ineqmat, edo=startedo, rounder=rounder), signvec))) {
     result_list <- list(set=current_set, edo=startedo)
     if (reconvert==TRUE) {
       return(convert(result_list$"set", result_list$"edo", edo))
