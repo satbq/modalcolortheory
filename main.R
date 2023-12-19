@@ -161,7 +161,8 @@ ratio <- function(set, edo=globaledo, rounder=globalrounder) {
   return(delta(set, edo, rounder)/eps(set, edo, rounder))
 }
 
-brightnessgraph <- function(set, numdigits=2, show_sums=TRUE, show_pitches=TRUE, edo=globaledo, rounder=globalrounder) {
+brightnessgraph <- function(set, numdigits=2, show_sums=TRUE, show_pitches=TRUE, fixed_do=FALSE,
+                            edo=globaledo, rounder=globalrounder) {
   library(igraph)
 
   card <- length(set)
@@ -233,16 +234,25 @@ brightnessgraph <- function(set, numdigits=2, show_sums=TRUE, show_pitches=TRUE,
     bad_rows <- duplicated(new_rounded_coordinates, MARGIN=1)
   }
 
+  if (fixed_do==TRUE) {
+    pitch_labels <- sapply(0:(card-1), rotatewrap, x=set, edo=edo)
+  } else {
+    pitch_labels <- sim(set,edo=edo)
+  }
+  pitch_labels <- apply(apply(pitch_labels,2, round, digits=numdigits), 2, paste, collapse=", ")
+
   label_matrix <- cbind(as.character(as.roman(1:card)),
                         rep(" (",card),
                         round(sums,digits=numdigits),
                         rep(")",card),
                         rep("\n",card),
-                        apply(apply(sim(set,edo=edo),2,round,digits=numdigits),2,paste,collapse=", "))
+                        pitch_labels)
+
   pitches_start_index <- 5
   pitches_end_index <- 6
   sums_start_index <- 2
   sums_end_index <- 4
+
   if (show_pitches==FALSE) {
     label_matrix <- label_matrix[,-(pitches_start_index:pitches_end_index)]
   }
