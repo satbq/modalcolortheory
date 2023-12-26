@@ -5,7 +5,7 @@ approximate_from_signvector <- function(signvec, ineqmat=NULL, card=NULL, edo=gl
   }
 
   res <- qr.solve(ineqmat[, 2:(dim(ineqmat)[2]-1)], signvec) # this assumes T equivalence and a central arrangement
-  res <- coord_from_edo(c(0, res))
+  res <- coord_from_edo(c(0, res), edo=edo)
   return(res)
 }
 
