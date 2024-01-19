@@ -506,7 +506,6 @@ diatonicsubsets <- function(subsetdegrees,set,uniq=TRUE,edo=globaledo,rounder=gl
 }
 
 subsetspectrum <- function(set,subsetcard,simplify=TRUE,mode="tn",edo=globaledo,rounder=globalrounder) { #Returns a list
-  # edosave <- edo
   card <- length(set)
   comb <- combn(card-1,subsetcard-1)
   comb <- rbind(rep(0,choose(card-1,subsetcard-1)),comb)
@@ -515,9 +514,10 @@ subsetspectrum <- function(set,subsetcard,simplify=TRUE,mode="tn",edo=globaledo,
   if (mode=="tni") { use <- primeform }
 
   if (simplify == TRUE) {
-    # edo <<- card
     comb <- fpunique(apply(comb,2,use,edo=card),MARGIN=2,rounder=rounder)
-    # edo <<- edosave
+    if (!("matrix" %in% class(comb))) {
+      comb <- as.matrix(comb)
+    }
   }
 
   res <- apply(comb,2,diatonicsubsets,set=set,edo=edo,rounder=rounder)
