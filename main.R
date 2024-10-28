@@ -667,6 +667,29 @@ countsvzeroes <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounde
   return(length(signveczeroes))
 }
 
+svzero_fingerprint <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
+  if (is.null(ineqmat)) {
+    card <- length(set)
+    ineqmat <- getineqmat(card)
+  }
+
+  count_twos <- function(vec) sum(abs(vec)==2)
+  two_count <- apply(ineqmat, 1, count_twos)
+  general_row_index <- which(two_count == 0)
+  anchored_row_index <- which(two_count == 1)
+  reflexive_tritone_index <- which(two_count == 2)
+
+  general_ineqmat <- ineqmat[general_row_index, ]
+  anchored_ineqmat <- ineqmat[anchored_row_index, ]
+  reflexive_tritone_ineqmat <- ineqmat[reflexive_tritone_index, ]
+
+  general_count <- countsvzeroes(set, ineqmat=general_ineqmat, edo=edo, rounder=rounder)
+  anchored_count <- countsvzeroes(set, ineqmat=anchored_ineqmat, edo=edo, rounder=rounder)
+  reflexive_tritone_count <- countsvzeroes(set, ineqmat=reflexive_tritone_ineqmat, edo=edo, rounder=rounder)
+
+  return(c(general_count, anchored_count, reflexive_tritone_count))
+}
+
 howfree <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder) {
   card <- length(set)
 
