@@ -713,15 +713,7 @@ colornum <- function(set, ineqmat=NULL, edo=globaledo, rounder=globalrounder,
   return(which(signvector_list[[card]]==signvec))
 }
 
-get_relevant_rows <- function(generic_intervals, ineqmat) {
-  # Indicates which rows of ineqmat affect the listed generic interals.
-
-  # Step 1: Process the generic intervals. They should be indexed such that unisons are 0.
-  generic_intervals <- generic_intervals[generic_intervals > 0]
-  card <- length(ineqmat[1,]) - 1
-  generic_intervals <- abs(sapply(generic_intervals, signed_interval_class, edo=card))
-
-  generics_in_row <- function(row) {
+affected_generic_intervals <- function(row, card) {
     row <- head(row, -1) # Ignore last column, which doesn't affect generic intervals.
     negative_positions <- which(row < 0)
     postitive_positions <- which(row > 0)
@@ -732,7 +724,15 @@ get_relevant_rows <- function(generic_intervals, ineqmat) {
     return(res)
   }
 
-  row_generics <- apply(ineqmat, 1, generics_in_row)
+get_relevant_rows <- function(generic_intervals, ineqmat) {
+  # Indicates which rows of ineqmat affect the listed generic interals.
+
+  # Step 1: Process the generic intervals. They should be indexed such that unisons are 0.
+  generic_intervals <- generic_intervals[generic_intervals > 0]
+  card <- length(ineqmat[1,]) - 1
+  generic_intervals <- abs(sapply(generic_intervals, signed_interval_class, edo=card))
+
+  row_generics <- apply(ineqmat, 1, affected_generic_intervals, card=card)
   check_row <- function(row, generic_interval) generic_interval %in% row
   check_generic <- function(generic_interval) {
     list_of_checks <- lapply(row_generics, check_row, generic_interval=generic_interval)
