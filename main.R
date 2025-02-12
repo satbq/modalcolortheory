@@ -484,6 +484,47 @@ VL_rolodex <- function(source, goal_type=NULL, reorder=TRUE, method="taxicab", e
   return(res)
 }
 
+brightness_vl_generators <- function(set, edo=globaledo, rounder=globalrounder) {
+  # Ideally this should account for transpositional symmetry, but for now it shows
+  # T1 and T7 as different voice leadings for (0,1,6,7).
+
+  # For now using the approximate transitive reduction from brightnessgraph()
+  library(igraph)
+
+  card <- length(set)
+  scalar_interval_matrix <- sim(set, edo)
+  sums <- colSums(scalar_interval_matrix)
+
+  comparisons <- -1*brightnessComps(set, edo, rounder)
+  comparisons[which(comparisons<0)] <- 0
+  diffs <- outer(sums, sums,'-')
+  diffs <- abs(comparisons * diffs)
+  min_diff <- min(diffs[diffs>10^(-rounder)])
+  diffs <- diffs/min_diff
+  diffs_nonzero <- !!diffs
+  diffs <- 3^(diffs-1)
+  diffs <- diffs_nonzero * diffs
+  weighted_graph <- graph_from_adjacency_matrix(diffs, weighted=TRUE)
+
+  get_neighbors <- function(i) {
+    suppressWarnings(path_lengths <- unlist(lapply(shortest_paths(weighted_graph, i, mode="out")[[1]], length)))
+    return(which(path_lengths==2))
+  }
+
+  reduced_comparisons <- matrix(0, nrow=card, ncol=card)
+  for (i in 1:card) {
+    reduced_comparisons[i, get_neighbors(i)] <- 1
+  }
+
+  arrows_in_graph  <- which(reduced_comparisons==1, arr.ind=TRUE)
+
+  from_which_mode <- arrows_in_graph[,1]
+  generic_intervals <- (arrows_in_graph[,2] - from_which_mode) %% card
+  generic_intervals <- (generic_intervals + 1)
+  specific_intervals <- scalar_interval_matrix[cbind(generic_intervals, from_which_mode)]
+  return(sort(fpunique(specific_intervals, rounder=rounder)))
+}
+
 # Subset Functions
 intervalspectrum <- function(set, edo=globaledo, rounder=globalrounder) {
   modes <- sim(set, edo)
