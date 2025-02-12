@@ -522,6 +522,7 @@ brightness_vl_generators <- function(set, edo=globaledo, rounder=globalrounder) 
   generic_intervals <- (arrows_in_graph[,2] - from_which_mode) %% card
   generic_intervals <- (generic_intervals + 1)
   specific_intervals <- scalar_interval_matrix[cbind(generic_intervals, from_which_mode)]
+  specific_intervals <- (-1 * specific_intervals) %% edo
   return(sort(fpunique(specific_intervals, rounder=rounder)))
 }
 
