@@ -1188,9 +1188,9 @@ readSCL <- function(filename, scaleonly=TRUE, edo=globaledo) {
   }
 
   #Convert integers to scale degrees
-  intToLog <- function(intString, edo=edo) {
+  intToLog <- function(intString, localedo=edo) {
     val <- strtoi(intString)
-    return(edo * log(val)/log(2))
+    return(localedo * log(val)/log(2))
   }
 
   #Apply above functions and convert cents to global EDO
