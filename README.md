@@ -5,7 +5,7 @@
 This repository hosts R code relevant to the article "Modal Color Theory" in the *Journal of Music Theory* 69/1 (2025): 1-49.
 The code is frozen as of April 2025 and should correspond to the comments made in the print version of that article.
 
-However, I'd strongly encourage you to use the package [musicMCT](https://github.com/satbq/musicMCT) instead. That package 
+However, I'd strongly encourage you to use the package [musicMCT](https://satbq.github.io/musicMCT/) instead. That package 
 includes documentation, explanatory vignettes, and ongoing development of new features.
 
 The main value of this repository (`modalcolortheory`) aside from compatibility with the *JMT* article's text is that it
