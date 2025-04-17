@@ -21,16 +21,16 @@ too!
 * Follow the [installation instructions in `musicMCT`'s readme file](https://github.com/satbq/musicMCT#readme) rather than those in footnote 7.
 * Footnote 43 refers to `ineqmats.rds` as a separate file, but the inequality matrices are contained inside the package `musicMCT` and don't need to be downloaded separately.
 * Footnote 49 uses intervals such as `just_wt` and `just_p4`. Rather than defining these as global variables, `musicMCT` uses a function `j()` to access them. Instead of `just_wt`, use `j(t)` or `j(2)`; instead of `just_p4`, use `j(4)`. The entire 5-limit just diatonic scale is available as `j(dia)`.
-* The function `colornum()` returns `NULL` by default unless you've downloaded and loaded `representative_signvectors`. In `modalcolortheory` it simply returns an error if it doesn't have access to the right file.
+* The function `musicMCT::colornum()` returns `NULL` by default unless you've downloaded and loaded `representative_signvectors`. In `modalcolortheory` it simply returns an error if it doesn't have access to the right file.
 * Footnote 74 points you to a Google Drive link for `color_adjacencies.rds`. That file is now available here on GitHub (in this repository, `modalcolortheory`, not in `musicMCT`).
 
 ## Format of the datasets
 
 ### color_adjacencies.rds
 
-This file is a [list](https://cran.r-project.org/doc/manuals/r-release/R-intro.html#index-list) of [adjacency lists](https://en.wikipedia.org/wiki/Adjacency_list). That is, each entry color_adjacencies[[i]] is a list of the adjacencies between colors of scales with i notes, ordered according to color number. Thus color_adjacencies[[i]][[j]] tells you which colors are adjacent to the i-note scale with color number j. Adjacency to color number 0, the perfectly even scale, is not listed because it's true of all scales.
+This file is a [list](https://cran.r-project.org/doc/manuals/r-release/R-intro.html#index-list) of [adjacency lists](https://en.wikipedia.org/wiki/Adjacency_list). That is, each entry `color_adjacencies[[i]]` is a list of the adjacencies between colors of scales with i notes, ordered according to color number. Thus `color_adjacencies[[i]][[j]]` tells you which colors are adjacent to the i-note scale with color number j. Adjacency to color number 0, the perfectly even scale, is not listed because it's true of all scales.
 
-One- and two-note scales are too simple to have much structure, so color_adjacencies[[1]] and color_adjacencies[[2]] are both NULL. For monads, there is only a single scale structure. For dyads, there are only three colors, arranged in the following graph:
+One- and two-note scales are too simple to have much structure, so `color_adjacencies[[1]]` and `color_adjacencies[[2]]` are both `NULL`. For monads, there is only a single scale structure. For dyads, there are only three colors, arranged in the following graph:
 
     1 <-> 0 <-> 2
 
@@ -91,7 +91,7 @@ library(igraph)
 hepta_network <- igraph::graph_from_adj_list(color_adjacencies[[7]]) # May take a minute or two to construct
 ```
 
-You can then use the tools of the igraph package, like `bfs()` to explore the structure of the space.
+You can then use the tools of the igraph package, like `igraph::bfs()` to explore the structure of the space.
 
 
 ### representative_signvectors.rds
@@ -107,7 +107,7 @@ For each cardinality, the sign vectors are sorted lexicographically, i.e. those 
 
 For now, `representative_signvectors` only includes scales of 7 notes or smaller. Functions that depend on `representative_signvectors` (in particular `colornum()`) won't work for larger scales.
 
-### representative_scales
+### representative_scales.rds
 
 Like the previous two files, `representative_scales` is structured as a list whose nth entry corresponds to scales with n notes. This means that representative_scales[[n]] is an n-by-k matrix whose columns represent the k distinct colors in the space. (The perfectly even scale isn't included--it can be created by calling `edoo(n)`.) The first column represents color number 1, and so on. Thus the order of scales in `representative_scales` matches the order of sign vectors in `representative_signvectors`. It would be possible (but potentially time consuming!) to rederive `representative_signvectors` from `representative_scales` with the following:
 
