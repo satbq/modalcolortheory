@@ -24,6 +24,20 @@ too!
 * The function `musicMCT::colornum()` returns `NULL` by default unless you've downloaded and loaded `representative_signvectors`. In `modalcolortheory` it simply returns an error if it doesn't have access to the right file.
 * Footnote 74 points you to a Google Drive link for `color_adjacencies.rds`. That file is now available here on GitHub (in this repository, `modalcolortheory`, not in `musicMCT`).
 
+## Supplementary Figures Mentioned in the Article
+
+Supplementary Figure 1: Trichord space colored to reflect scalar "colors"
+
+<img src="supp-fig-1.png" width="75%" />
+
+[View Supplementary Figure 2 on YouTube](https://www.youtube.com/shorts/CCzIJoh6cBM): Rotating sphere of tetrachord colors
+
+Supplementary Figure 3: Trichord space colored according to brightness ratio
+
+<img src="supp-fig-3.tif" width="75%" />
+
+[View Supplementary Figure 4 on YouTube](https://www.youtube.com/shorts/d4wlD7uL6xY): Rotating sphere of tetrachords, colored according to brightness ratio
+
 ## Format of the datasets
 
 ### color_adjacencies.rds
