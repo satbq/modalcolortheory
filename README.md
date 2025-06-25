@@ -34,7 +34,7 @@ Supplementary Figure 1: Trichord space colored to reflect scalar "colors"
 
 Supplementary Figure 3: Trichord space colored according to brightness ratio
 
-<img src="supp-fig-3.tif" width="75%" />
+<img src="supp-fig-3.png" width="75%" />
 
 [View Supplementary Figure 4 on YouTube](https://www.youtube.com/shorts/d4wlD7uL6xY): Rotating sphere of tetrachords, colored according to brightness ratio
 
