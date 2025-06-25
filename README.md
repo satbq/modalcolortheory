@@ -26,17 +26,17 @@ too!
 
 ## Supplementary Figures Mentioned in the Article
 
-Supplementary Figure 1: Trichord space colored to reflect scalar "colors"
+**Supplementary Figure 1**: Trichord space colored to reflect scalar "colors"
 
 <img src="supp-fig-1.png" width="75%" />
 
-[View Supplementary Figure 2 on YouTube](https://www.youtube.com/shorts/CCzIJoh6cBM): Rotating sphere of tetrachord colors
+[View **Supplementary Figure 2** on YouTube](https://www.youtube.com/shorts/CCzIJoh6cBM): Rotating sphere of tetrachord colors
 
-Supplementary Figure 3: Trichord space colored according to brightness ratio
+**Supplementary Figure 3**: Trichord space colored according to brightness ratio
 
 <img src="supp-fig-3.png" width="75%" />
 
-[View Supplementary Figure 4 on YouTube](https://www.youtube.com/shorts/d4wlD7uL6xY): Rotating sphere of tetrachords, colored according to brightness ratio
+[View **Supplementary Figure 4** on YouTube](https://www.youtube.com/shorts/d4wlD7uL6xY): Rotating sphere of tetrachords, colored according to brightness ratio
 
 ## Format of the datasets
 
